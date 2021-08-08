@@ -1,0 +1,82 @@
+# Use the latest version of Docker Compose.
+version: "3.5"
+
+# Not all of our services need to be able to talk to each other. It is best to
+# keep them separated where we can.
+networks:
+
+  # Ultimately, we'll only expose the proxy service publicly. That means that
+  # all services that we need to be publicly accessible through the proxy need
+  # to be able to talk to the proxy.
+  proxied:
+
+  # Then there are those services that don't need to be publicly accessible and
+  # only communicate with other services. They go into the protected network.
+  protected:
+
+# We want to spawn several separate services from Docker images and manage all
+# of them from this file.
+services:
+
+  ##############################################################################
+  #
+  # Proxy
+  #   We use Nginx as a reverse proxy to direct requests to the ports of the
+  #   correct services. This way we can hide the application's inner network.
+  #
+  ##############################################################################
+  proxy:
+    container_name: reachable.proxy.development
+
+    # We can use the latest version of Nginx.
+    image: nginx:latest
+
+    # We want to expose at port 8004.
+    ports:
+      - 8004:80
+
+    # We can use volumes to copy our reverse proxy configuration into Nginx.
+    volumes:
+      # Use the development configuration to expose only what's necessary.
+      - ./proxy/development.conf:/etc/nginx/nginx.conf
+      - ./proxy/error.log:/etc/nginx/error_log.log
+
+    # The proxy needs access to the publicly accessible services.
+    depends_on:
+      - client
+
+    # We need access to all the services that should be exposed (partly)
+    # publicly.
+    networks:
+      - proxied
+
+  ##############################################################################
+  #
+  # Client
+  #   This is the service that serves all client-side files.
+  #
+  ##############################################################################
+  client:
+    container_name: reachable.client.development
+
+    # We always want to restart when things go wrong.
+    restart: always
+
+    # We want to build from the development dockerfile in the client directory.
+    build:
+      context: ./client/
+      dockerfile: development.dockerfile
+
+    # We can expose the client service in the container network.
+    expose:
+      - "8000"
+
+    # We want to bind the changes inside the container to a local folder so that
+    # we can update the code in real time.
+    volumes:
+      - ./client:/client
+
+    # We need the reverse proxy to expose the client publicly, so we need to
+    # give it access to the client service.
+    networks:
+      - proxied
