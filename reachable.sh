@@ -1,8 +1,9 @@
 #!/bin/bash
 # File to quickly spin up a development container for the Reachable project.
 
-# Make sure we can run Docker.
-rm -rf ~/.docker/config.conf
+# Make sure we can run Docker. This config file is not needed and on Windows it
+# can cause some odd bugs causing Docker to fail.
+rm ~/.docker/config.json
 
 # Visit the project directory.
 cd ~/Projects/reachable;

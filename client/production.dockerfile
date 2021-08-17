@@ -1,5 +1,5 @@
 # Use the latest version of Node.
-FROM node:current
+FROM node:current as build
 
 # Create the working directory and give ownership to the node user.
 RUN mkdir -p /client && chown -R node:node /client
@@ -10,20 +10,32 @@ WORKDIR /client
 # Copy over all package manager files.
 COPY --chown=node:node package*.json ./
 
-# Tell node that we're in production mode.
-ENV NODE_ENV production
+# We need to build in development mode.
+ENV NODE_ENV development
+
+# Use the node user to run the install commands.
+USER node
+
+# Install all development dependencies.
+RUN npm install
+
+# Copy the application files to the directory.
+COPY --chown=node:node . .
+
+# Make sure we optimize for production.
+RUN npm run build
+
+# Use our build phase to host the live environment.
+FROM build as release
+
+# After building, we can switch to production mode.
+ENV NODE_ENV=production
 
 # Use the node user to run the install commands.
 USER node
 
 # Install only the libraries that we need for production.
 RUN npm ci --only=production
-
-# Make sure we optimize for production.
-RUN npm run build
-
-# Copy the application files to the directory.
-COPY --chown=node:node . .
 
 # Let Nuxt know where we're hosting.
 ENV NUXT_HOST=0.0.0.0
