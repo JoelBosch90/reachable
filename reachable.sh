@@ -1,15 +1,195 @@
 #!/bin/bash
-# File to quickly spin up a development container for the Reachable project.
+################################################################################
+#
+#   Reachable
+#
+#       This bash file processes some basic actions for the Reachable project.
+#       It currently supports the following commands:
+#
+#           update        Updates the local repository to the latest version.
+#           release       Release local changes to the development branch and
+#                         pushes them to the live version.
+#           dev           Spins up a local development environment.
+#           stable        Spins up the current stable version.
+#           commit
+#
+#   Usage example
+#
+#       You can use this file by executing this file and adding the commands
+#       above seperated by spaces. These commands will be executed in order.
+#       For example, to update the local repository and then run a local
+#       development environment, you can run the following:
+#
+#           reachable update dev
+#
+#       Some command require an extra argument. You can call these like this:
+#
+#           reachable commit "Commit message"
+#
+#   Requirements
+#
+#       To properly use this file, there are two requirements that must be met:
+#
+#       Execute the following command to give this file permission to be
+#       executed:
+#           sudo chmod +x reachable.sh
+#
+#       Add a shortcut so that you can execute this file from anywhere and no
+#       longer need to write the extension:
+#           sudo ln -s reachable.sh /usr/bin/reachable
+#
+################################################################################
 
-# Make sure we can run Docker. This config file is not needed and on Windows it
-# can cause some odd bugs causing Docker to fail.
-rm ~/.docker/config.json
+# Get access to the project's working directory.
+WORKDIR="$(dirname "$(readlink -f "$0")")"
 
-# Visit the project directory.
-cd ~/Projects/reachable;
+################################################################################
+#
+#   updateProject
+#       Function to update the project repository.
+#
+################################################################################
+updateProject () {
 
-# Update to the latest version from the repository.
-git pull;
+  # Visit the project directory.
+  cd $WORKDIR;
 
-# Spin up the Docker Compose network with the development settings.
-docker-compose -f docker-compose.dev.yml up --build
+  # Update to the latest version from the repository.
+  git pull;
+}
+
+################################################################################
+#
+#   runDevelopment
+#       Function to spin up a development environment.
+#
+################################################################################
+runDevelopment () {
+
+  # Visit the project directory.
+  cd $WORKDIR;
+
+  # Visit the development branch.
+  git checkout development
+
+  # Make sure we can run Docker. This config file is not needed and on Windows
+  # it can cause some odd bugs causing Docker to fail.
+  rm -f ~/.docker/config.json
+
+  # Spin up the Docker Compose network with the development settings.
+  docker-compose -f docker-compose.dev.yml up --build
+}
+
+################################################################################
+#
+#   runProduction
+#       Function to spin up a production environment example.
+#
+################################################################################
+runProduction () {
+
+  # First update the current project so that we'll have the latest version.
+  updateProject
+
+  # Visit the stable branch.
+  git checkout stable
+
+  # Make sure we can run Docker. This config file is not needed and on Windows
+  # it can cause some odd bugs causing Docker to fail.
+  rm -f ~/.docker/config.json
+
+  # Spin up the Docker Compose network with the production settings.
+  docker-compose up --build
+}
+
+################################################################################
+#
+#   release
+#       Function to release all development changes to stable. GitHub actions
+#       will pick this up and automatically release them on the live server as
+#       well.
+#
+################################################################################
+release () {
+
+  # Visit the project directory.
+  cd $WORKDIR;
+
+  # Visit the stable branch.
+  git checkout stable
+
+  # Merge the developmental changes to the stable branch.
+  git merge development
+
+  # Push the new changes to the stable branch.
+  git push
+}
+
+################################################################################
+#
+#   commit
+#       Function to commit and push all local changes to the currently selected
+#       branch. Consumes one argument as the commit message.
+#
+################################################################################
+commit () {
+
+  # Visit the project directory.
+  cd $WORKDIR;
+
+  # Add all changes to this commit.
+  git add .
+
+  # Commit the changes with the provided message.
+  git commit -m "$1"
+
+  # Push the new changes to the currently selected branch.
+  git push
+}
+
+# Loop through the command line arguments.
+while [[ $# -gt 0 ]]; do
+
+  # Give more meaningful names to the command line arguments.
+  command="$1"
+  argument="$2"
+
+  # Determine per command what to do.
+  case "$command" in
+
+    # Run `reachable commit "Commit message"` to commit and push all recent
+    # changes to the current branch.
+    c|commit)
+      commit "$argument"
+      shift # Get ready to process the next command.
+      shift # Skip once extra because we used an extra argument for this.
+      ;;
+
+    # Run `reachable update` to update the local repository.
+    u|update)
+      updateProject
+      shift # Get ready to process the next command.
+      ;;
+
+    # Run `reachable release` to release the current version of the
+    # development branch and roll those changes out to the live version.
+    r|release)
+      release
+      shift # Get ready to process the next command.
+      ;;
+
+    # Run `reachable dev` to run a local development instance of the
+    # Reachable application.
+    d|dev)
+      runDevelopment
+      shift # Get ready to process the next command.
+      ;;
+
+    # Run `reachable stable` to run a local example of the stable release
+    # of the Reachable application.
+    s|stable)
+      runProduction
+      shift # Get ready to process the next command.
+      ;;
+  esac
+done
