@@ -11,7 +11,9 @@
 #                         pushes them to the live version.
 #           dev           Spins up a local development environment.
 #           stable        Spins up the current stable version.
-#           commit
+#           commit        Will commit and push the local changes on the current
+#                         branch to the remote repository.
+#                         (Takes an extra argument as the commit message.)
 #
 #   Usage example
 #
