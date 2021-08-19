@@ -32,13 +32,15 @@
 #
 #       To properly use this file, there are two requirements that must be met:
 #
-#       Execute the following command to give this file permission to be
-#       executed:
-#           sudo chmod +x reachable.sh
+#           Execute the following command to give this file permission to be
+#           executed:
 #
-#       Add a shortcut so that you can execute this file from anywhere and no
-#       longer need to write the extension:
-#           sudo ln -s reachable.sh /usr/bin/reachable
+#               sudo chmod +x reachable.sh
+#
+#           Add a shortcut so that you can execute this file from anywhere and
+#           no longer need to write the extension:
+#
+#               sudo ln -s reachable.sh /usr/bin/reachable
 #
 ################################################################################
 
