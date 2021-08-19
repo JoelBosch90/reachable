@@ -170,7 +170,7 @@ while [[ $# -gt 0 ]]; do
       ;;
 
     # Run `reachable update` to update the local repository.
-    u|update)
+    u|up|update)
       updateProject
       shift # Get ready to process the next command.
       ;;
@@ -184,7 +184,7 @@ while [[ $# -gt 0 ]]; do
 
     # Run `reachable dev` to run a local development instance of the
     # Reachable application.
-    d|dev)
+    d|dev|development)
       runDevelopment
       shift # Get ready to process the next command.
       ;;
