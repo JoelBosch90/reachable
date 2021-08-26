@@ -1,5 +1,5 @@
 <template>
-  <CreateForm />
+  <Message />
 </template>
 
 <script>
