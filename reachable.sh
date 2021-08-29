@@ -73,9 +73,6 @@ runDevelopment () {
   # Visit the project directory.
   cd $WORKDIR;
 
-  # Visit the development branch.
-  git checkout development
-
   # Make sure we can run Docker. This config file is not needed and on Windows
   # it can cause some odd bugs causing Docker to fail.
   rm -f ~/.docker/config.json
@@ -94,9 +91,6 @@ runProduction () {
 
   # First update the current project so that we'll have the latest version.
   updateProject
-
-  # Visit the stable branch.
-  git checkout stable
 
   # Make sure we can run Docker. This config file is not needed and on Windows
   # it can cause some odd bugs causing Docker to fail.
@@ -182,7 +176,7 @@ while [[ $# -gt 0 ]]; do
       shift # Get ready to process the next command.
       ;;
 
-    # Run `reachable dev` to run a local development instance of the
+    # Run `reachable development` to run a local development instance of the
     # Reachable application.
     d|dev|development)
       runDevelopment
