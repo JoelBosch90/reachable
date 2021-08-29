@@ -1,0 +1,12 @@
+################################################################################
+#
+#   Requirements
+#     This is the file that contains all of the Python dependencies that will be
+#     installed with PIP while building the Docker image.
+#
+################################################################################
+
+# Install the latest version of Django.
+django
+django-rest-framework
+djongo

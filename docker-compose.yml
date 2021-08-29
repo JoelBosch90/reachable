@@ -80,3 +80,34 @@ services:
     # give it access to the client service.
     networks:
       - proxied
+
+  ##############################################################################
+  #
+  # API
+  #   This is the service that serves all server-side requests.
+  #
+  ##############################################################################
+  api:
+    container_name: reachable.api.production
+
+    # We always want to restart when things go wrong.
+    restart: always
+
+    # We want to build from the production dockerfile in the API directory.
+    build:
+      context: ./api/
+      dockerfile: production.dockerfile
+
+    # We can expose the api service in the container network.
+    expose:
+      - "3000"
+
+    # Pass on the environment variables to the API service.
+    environment:
+      # Tell the API where to reach the client.
+      - API_URL=http://localhost:8004/
+
+    # We need the reverse proxy to expose the API publicly, so we need to
+    # give it access to the API service.
+    networks:
+      - proxied
