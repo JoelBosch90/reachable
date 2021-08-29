@@ -71,6 +71,11 @@ services:
     expose:
       - "8000"
 
+    # Pass on the environment variables to the client service.
+    environment:
+      # Tell the client where to reach the API.
+      - API_URL=https://reachable.joelbosch.nl/api/
+
     # We need the reverse proxy to expose the client publicly, so we need to
     # give it access to the client service.
     networks:

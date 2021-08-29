@@ -71,6 +71,11 @@ services:
     expose:
       - "8000"
 
+    # Pass on the environment variables to the client service.
+    environment:
+      # Tell the client where to reach the API.
+      - API_URL=http://localhost:8004/api/
+
     # We want to bind the changes inside the container to a local folder so that
     # we can update the code in real time.
     volumes:

@@ -34,12 +34,30 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    // https://github.com/nuxt-community/proxy-module
+    // '@nuxtjs/proxy',
     // https://go.nuxtjs.dev/pwa
     '@nuxtjs/pwa'
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {},
+  axios: {
+    // Fallback base URL for API calls.
+    baseUrl: 'http://localhost:8004/api/'
+  },
+
+  // This part of the configuration is accessible both to the client and the
+  // server.
+  publicRuntimeConfig: {
+    // Base URL for API calls.
+    axios: {
+      baseURL: process.env.API_URL
+    }
+  },
+
+  // This part of the configuration is accessible to the server only.
+  privateRuntimeConfig: {
+  },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {
