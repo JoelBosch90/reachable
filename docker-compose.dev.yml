@@ -109,8 +109,8 @@ services:
 
     # Pass on the environment variables to the API service.
     environment:
-      # Tell the API where to reach the client.
-      - API_URL=http://localhost:8004/
+      # Tell the API where to find the client.
+      - CLIENT_URL=http://localhost:8004/
 
     # We need the reverse proxy to expose the API publicly, so we need to
     # give it access to the API service.

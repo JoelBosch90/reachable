@@ -98,14 +98,14 @@ services:
       context: ./api/
       dockerfile: production.dockerfile
 
-    # We can expose the api service in the container network.
+    # We can expose the API  service in the container network.
     expose:
       - "3000"
 
     # Pass on the environment variables to the API service.
     environment:
-      # Tell the API where to reach the client.
-      - API_URL=http://localhost:8004/
+      # Tell the API where to find the client.
+      - CLIENT_URL=https://reachable.joelbosch.nl/
 
     # We need the reverse proxy to expose the API publicly, so we need to
     # give it access to the API service.
