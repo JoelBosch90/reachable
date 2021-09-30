@@ -1,5 +1,8 @@
 <template>
-  <Message />
+  <main>
+    <Message />
+    <Form />
+  </main>
 </template>
 
 <script>

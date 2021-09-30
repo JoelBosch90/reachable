@@ -1,5 +1,5 @@
 <template>
-  <ContactForm />
+  <FormResponse />
 </template>
 
 <script>

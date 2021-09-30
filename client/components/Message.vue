@@ -1,5 +1,5 @@
 <template>
   <p>
-    Message placeholder.
+    Message.
   </p>
 </template>

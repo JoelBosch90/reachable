@@ -1,5 +1,6 @@
 <template>
   <form @submit.prevent="createLink">
+    <input placeholder="Message">
     <input placeholder="Email">
     <button>Submit</button>
   </form>
