@@ -1,20 +1,32 @@
-# Use Python 3.
-FROM python:3
+# Use the latest version of Python.
+FROM python:latest
+
+# Create a user with default privileges as a worker.
+RUN useradd --shell /bin/bash --create-home worker
+
+# Create the working directory and give ownership to the worker.
+RUN mkdir -p /client && chown -R worker:worker /client
+
+# We want to make sure that we don't run the install commands as a root user.
+USER worker
 
 # Use the new working directory.
 WORKDIR /api
 
-# Copy over all package manager files. Make sure the django user has access.
-COPY requirements.txt ./
+# Copy the application files to the directory.
+COPY --chown=worker:worker . .
+
+# Send python output straight through to the terminal.
+ENV PYTHONUNBUFFERED=1
+
+# Update PIP.
+RUN python -m pip install --upgrade pip
 
 # Install all dependencies.
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the application files to the directory.
-COPY . .
+RUN pip install --no-cache-dir -r requirements-dev.txt
 
 # We want to host the API at port 3000.
 EXPOSE 3000
 
-# Start the API server in development mode.
-CMD ["python", "./server.py"]
+# Start the API server.
+CMD ["python", "manage.py", "runserver", "0.0.0.0:3000"]

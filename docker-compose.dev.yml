@@ -112,6 +112,11 @@ services:
       # Tell the API where to find the client.
       - CLIENT_URL=http://localhost:8004/
 
+    # We want to bind the changes inside the container to a local folder so that
+    # we can update the code in real time.
+    volumes:
+      - ./api:/api
+
     # We need the reverse proxy to expose the API publicly, so we need to
     # give it access to the API service.
     networks:

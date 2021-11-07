@@ -9,4 +9,3 @@
 # Install the latest version of Django.
 django
 django-rest-framework
-djongo

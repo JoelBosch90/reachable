@@ -12,7 +12,7 @@ export default {
     // On submit, we want to attempt to create a new link with the information
     // submitted in the form.
     createLink () {
-      this.$axios.post('link', this.form)
+      this.$axios.put('link', this.form)
     }
   }
 }
