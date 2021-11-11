@@ -1,7 +1,7 @@
 <template>
   <form @submit.prevent="createLink">
-    <input placeholder="Message">
-    <input placeholder="Email">
+    <input name="" placeholder="Message">
+    <input name="user" placeholder="Email">
     <button>Submit</button>
   </form>
 </template>
@@ -12,7 +12,7 @@ export default {
     // On submit, we want to attempt to create a new link with the information
     // submitted in the form.
     createLink () {
-      this.$axios.put('link', this.form)
+      this.$axios.post('forms/', this.form)
     }
   }
 }

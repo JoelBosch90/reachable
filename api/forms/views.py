@@ -2,6 +2,7 @@ from rest_framework import generics, permissions
 from .models import User, Form, Link, Input
 from .serializers import UserSerializer, FormSerializer, LinkSerializer, InputSerializer
 
+
 class FormList(generics.ListCreateAPIView):
   """
   This is the endpoint that allows for listing and creating forms.
@@ -15,6 +16,7 @@ class FormList(generics.ListCreateAPIView):
 
   # Everyone can view forms, but only the user that owns them can modify them.
   permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
 
 class FormDetail(generics.RetrieveUpdateDestroyAPIView):
   """
@@ -31,6 +33,7 @@ class FormDetail(generics.RetrieveUpdateDestroyAPIView):
   # Everyone can view forms, but only the user that owns them can modify them.
   permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+
 class LinkList(generics.ListCreateAPIView):
   """
   This is the endpoint that allows for listing and creating links.
@@ -44,6 +47,7 @@ class LinkList(generics.ListCreateAPIView):
 
   # Everyone can view links, but only the user that owns them can modify them.
   permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
 
 class LinkDetail(generics.RetrieveUpdateDestroyAPIView):
   """
@@ -60,6 +64,7 @@ class LinkDetail(generics.RetrieveUpdateDestroyAPIView):
   # Everyone can view links, but only the user that owns them can modify them.
   permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+
 class InputList(generics.ListCreateAPIView):
   """
   This is the endpoint that allows for listing and creating inputs.
@@ -73,6 +78,7 @@ class InputList(generics.ListCreateAPIView):
 
   # Everyone can view inputs, but only the user that owns them can modify them.
   permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
 
 class InputDetail(generics.RetrieveUpdateDestroyAPIView):
   """

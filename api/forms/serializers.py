@@ -1,12 +1,14 @@
 from rest_framework import serializers
 from .models import User, Form, Link, Input
 
+
 class UserSerializer(serializers.ModelSerializer):
   class Meta:
     model = User
     fields = [
       "email",
     ]
+
 
 class FormSerializer(serializers.ModelSerializer):
   class Meta:
@@ -20,6 +22,7 @@ class FormSerializer(serializers.ModelSerializer):
       "description": {"required": False}
     }
 
+
 class LinkSerializer(serializers.ModelSerializer):
   class Meta:
     model = Link
@@ -27,6 +30,7 @@ class LinkSerializer(serializers.ModelSerializer):
       "form",
       "key",
     ]
+
 
 class InputSerializer(serializers.ModelSerializer):
   class Meta:

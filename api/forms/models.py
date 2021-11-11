@@ -1,5 +1,6 @@
 from django.db import models
 
+
 # Create your models here.
 class User(models.Model):
   """
@@ -16,6 +17,7 @@ class User(models.Model):
 
     # We can use the email address. It should be unique.
     return self.email
+
 
 class Form(models.Model):
   """
@@ -41,6 +43,7 @@ class Form(models.Model):
     # combination.
     return self.name + ':' + str(self.user)
 
+
 class Link(models.Model):
   """
   This model represents a link. A link is always tied to a single form, and is
@@ -63,6 +66,7 @@ class Link(models.Model):
     # We can combine the link's key, which should be unique. For convenience, we
     # also add the form it links to.
     return self.key + ':' + str(self.form)
+
 
 class Input(models.Model):
   """
