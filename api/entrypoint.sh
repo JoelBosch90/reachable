@@ -5,8 +5,13 @@
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
+# Create database migrations.
+echo "Creating database migrations..."
+python manage.py makemigrations
+
 # Apply database migrations.
 echo "Applying database migrations..."
+python manage.py migrate
 
 # Start the server.
 echo "Starting Django server..."

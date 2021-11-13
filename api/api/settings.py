@@ -88,8 +88,6 @@ WSGI_APPLICATION = 'api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-print(os.environ)
-
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
