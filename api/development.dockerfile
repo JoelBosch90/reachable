@@ -29,4 +29,4 @@ RUN pip install --no-cache-dir -r requirements-dev.txt
 EXPOSE 3000
 
 # Start the API server.
-CMD ["python", "manage.py", "runserver", "0.0.0.0:3000"]
+CMD ["./entrypoint.sh"]

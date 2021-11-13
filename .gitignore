@@ -1,0 +1,6 @@
+# We might keep login credentials in environment files in development. We should
+# not commit them to the repository.
+.env
+
+# We never want to commit the local database.
+database/

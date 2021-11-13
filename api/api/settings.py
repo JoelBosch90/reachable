@@ -10,8 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+# Import all dependencies.
 from pathlib import Path
-import os.path
+import os
 import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -87,10 +88,18 @@ WSGI_APPLICATION = 'api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+print(os.environ)
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': os.getenv('DATABASE_NAME'),
+        'CLIENT': {
+          'username': os.getenv('DATABASE_USERNAME'),
+          'password': os.getenv('DATABASE_PASSWORD'),
+          'host': os.getenv('DATABASE_HOST'),
+          'port': int(os.getenv('DATABASE_PORT')),
+        }
     }
 }
 

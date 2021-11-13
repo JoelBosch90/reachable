@@ -6,9 +6,12 @@
 #
 ################################################################################
 
-# Install the latest version of Django.
+# Install the essential packages.
 django
+djongo
 django-rest-framework
+
+# Install the development tools.
 black
 pylint
 pylint-django
