@@ -16,9 +16,18 @@ class FormConfirmation:
     """
 
     send_mail(
+
+      # Construct a confirmation message.
+      # @todo: add links to both the form and the confirmation page.
       subject="Confirm your form.",
       message="Congratulations on creating your new form!\n\nClick here to start accepting new submissions for the form '" + form.name + "'.\n\nEnjoy your form!",
-      from_email='reachable@joelbosch.nl',
+
+      # Send a single email to the user.
       recipient_list=[user.email],
+
+      # We can use the default FROM address.
+      from_email=None,
+
+      # We do want to know when sending fails.
       fail_silently=False,
     )
