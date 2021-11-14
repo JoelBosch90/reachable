@@ -21,8 +21,17 @@ export default {
   methods: {
     // On submit, we want to attempt to create a new link with the information
     // submitted in the form.
-    createLink () {
-      this.$axios.post('forms/', this.form)
+    async createLink () {
+      // Create the form, and get the key.
+      const response = await this.$axios.post('forms/', this.form)
+
+      // Redirect the user to the new form.
+      this.$router.push({
+        name: 'form-key',
+        params: {
+          key: response.data
+        }
+      })
     }
   }
 }

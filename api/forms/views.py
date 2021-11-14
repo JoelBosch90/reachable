@@ -1,10 +1,10 @@
 # Import dependencies.
 import secrets
-from tools.Mail import FormConfirmation
+import json
 from rest_framework import generics, permissions, response
+from tools.Mail import FormConfirmationMail, FormResponseMail
 from .models import User, Form, Link, Input
 from .serializers import UserSerializer, FormSerializer, LinkSerializer, InputSerializer
-
 
 class FormList(generics.CreateAPIView):
   """
@@ -32,7 +32,7 @@ class FormList(generics.CreateAPIView):
       userSerializer.save()
 
     # Get access to the user object.
-    user = User(email=request.data['email'])
+    user = User.objects.get(email=request.data['email'])
 
     # Create a new form.
     formSerializer = FormSerializer(data={
@@ -49,7 +49,8 @@ class FormList(generics.CreateAPIView):
 
       # Add a message input to the form.
       inputSerializer = InputSerializer(data={
-        'name': 'Message',
+        'name': "Message",
+        'title': "Add a message to send to the form's owner.",
         'form': form.id
       })
 
@@ -81,7 +82,7 @@ class FormList(generics.CreateAPIView):
           link = linkSerializer.save()
 
           # Send a confirmation email.
-          FormConfirmation().send(user, form)
+          FormConfirmationMail().send(user, form)
 
           # Store the link and send it back to the client.
           return response.Response(link.key)
@@ -89,6 +90,29 @@ class FormList(generics.CreateAPIView):
     # If it is not a valid form request, let the client know.
     else:
       return response.Response(formSerializer.errors)
+
+
+class FormResponse(generics.CreateAPIView):
+  """
+  This is the endpoint that processes a form response.
+  """
+
+  # Everyone can respond to forms.
+  permission_classes = [permissions.AllowAny]
+
+  def post(self, request, format=None):
+    """
+    Respond to a form.
+    """
+
+    # Get the form.
+    form = Form.objects.get(id=request.data['form'])
+
+    # Send the response to the owner of the form.
+    FormResponseMail().send(form.user, form, request.data['inputs'])
+
+    # Send back a success message.
+    return response.Response(True)
 
 
 class FormDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -118,8 +142,8 @@ class LinkList(generics.ListCreateAPIView):
   # We're using the Link serializer.
   serializer_class = LinkSerializer
 
-  # Everyone can view links, but only the user that owns them can modify them.
-  permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+  # Only the user that owns them can list or create links.
+  permission_classes = [permissions.IsAuthenticated]
 
 
 class LinkDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -134,8 +158,62 @@ class LinkDetail(generics.RetrieveUpdateDestroyAPIView):
   # We're using the Link serializer.
   serializer_class = LinkSerializer
 
-  # Everyone can view links, but only the user that owns them can modify them.
-  permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+  # Only the user that owns them can modify them.
+  permission_classes = [permissions.IsAuthenticated]
+
+
+class ConfirmationLink(generics.RetrieveAPIView):
+  """
+  This is the endpoint that allows for retrieving individual confirmation links.
+  """
+
+  # @todo: implement.
+  pass
+
+
+class FormLink(generics.RetrieveAPIView):
+  """
+  This is the endpoint that allows for retrieving individual form links.
+  """
+
+  # We're using the Link objects.
+  queryset = Link.objects.all()
+
+  # We're using the Link serializer.
+  serializer_class = LinkSerializer
+
+  # Everyone can view form links.
+  permission_classes = [permissions.AllowAny]
+
+  def get(self, request, key, format=None):
+    """
+    Get the details from a form link.
+    """
+
+    # Get the link object.
+    link = Link.objects.get(key=key)
+
+    # Construct the response object.
+    result = {
+
+      # We need to know which form needs to be submitted.
+      'id': link.form.id,
+
+      # Add the form's name.
+      'name': link.form.name,
+
+      # Add the form's description.
+      'description': link.form.description,
+
+      # We need to know all inputs.
+      'inputs': [{
+        'name': input.name,
+        'title': input.title
+      } for input in link.form.inputs.all()]
+    }
+
+    # Return the dictionary as a JSON object.
+    return response.Response(json.dumps(result))
 
 
 class InputList(generics.ListCreateAPIView):

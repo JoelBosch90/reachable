@@ -62,12 +62,12 @@ class Link(models.Model):
   to identify
   """
 
-  # A link is always tied to a single  form.
+  # A link is always tied to a single form.
   form = models.ForeignKey(Form, related_name='links', on_delete=models.CASCADE)
 
   # A link is identified by this key. Every link should be unique, regardless of
   # the form it is attached to. It should have a reasonable length to fit a URL.
-  key = models.CharField(max_length=128, null=True, unique=True)
+  key = models.CharField(max_length=128, primary_key=True)
 
   def __str__(self):
     """
