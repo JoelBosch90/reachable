@@ -8,7 +8,7 @@ class User(models.Model):
   """
 
   # Users are identified by their email address.
-  email = models.CharField(max_length=320)
+  email = models.CharField(max_length=320, unique=True, primary_key=True)
 
   def __str__(self):
     """
@@ -24,8 +24,11 @@ class Form(models.Model):
   This model represents a single form.
   """
 
+  # Add an automatic primary key.
+  id = models.AutoField(primary_key=True)
+
   # A form is always tied to a user.
-  user = models.ForeignKey(User, on_delete=models.CASCADE)
+  user = models.ForeignKey(User, related_name='forms', on_delete=models.CASCADE)
 
   # A form is identified by a name, which is unique per user.
   name = models.CharField(max_length=256, default='Form')
@@ -33,6 +36,14 @@ class Form(models.Model):
   # Every form can have an optional description they can use to make a note
   # about the form to themselves.
   description = models.CharField(max_length=1024, blank=True, null=True)
+
+  class Meta:
+    """
+    Extra settings for the Form class.
+    """
+
+    # Make sure that the form's name is unique per user.
+    unique_together = ['user', 'name']
 
   def __str__(self):
     """
@@ -52,11 +63,11 @@ class Link(models.Model):
   """
 
   # A link is always tied to a single  form.
-  form = models.ForeignKey(Form, on_delete=models.CASCADE)
+  form = models.ForeignKey(Form, related_name='links', on_delete=models.CASCADE)
 
   # A link is identified by this key. Every link should be unique, regardless of
-  # the form it is attached to.
-  key = models.CharField(max_length=2048, null=True)
+  # the form it is attached to. It should have a reasonable length to fit a URL.
+  key = models.CharField(max_length=128, null=True, unique=True)
 
   def __str__(self):
     """
@@ -74,13 +85,21 @@ class Input(models.Model):
   """
 
   # An input is always tied to a single form.
-  form = models.ForeignKey(Form, on_delete=models.CASCADE)
+  form = models.ForeignKey(Form, related_name='inputs', on_delete=models.CASCADE)
 
   # An input is identified by a name that is unique for each form.
   name = models.CharField(max_length=256)
 
   # Optionally, we can define a tooltip attribute.
   title = models.CharField(max_length=512, blank=True, null=True)
+
+  class Meta:
+    """
+    Extra settings for the Input class.
+    """
+
+    # Make sure that the input's name is unique per form.
+    unique_together = ['form', 'name']
 
   def __str__(self):
     """

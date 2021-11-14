@@ -48,8 +48,6 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
   "DEFAULT_AUTHENTICATION_CLASSES": [
     "rest_framework.authentication.TokenAuthentication",
-    "rest_framework.authentication.BasicAuthentication",
-    "rest_framework.authentication.SessionAuthentication",
   ],
   "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
@@ -151,3 +149,14 @@ STATIC_URL = '/api/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Email settings.
+# https://docs.djangoproject.com/en/3.2/topics/email/
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('SMTP_HOST')
+EMAIL_PORT = os.getenv('SMTP_PORT')
+EMAIL_USE_SSL = EMAIL_PORT == 465
+EMAIL_USE_TLS = EMAIL_PORT == 587
+EMAIL_HOST_USER = os.getenv('SMTP_USERNAME')
+EMAIL_HOST_PASSWORD = os.getenv('SMTP_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('SMTP_FROM')
