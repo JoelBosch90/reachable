@@ -1,6 +1,7 @@
 # Import dependencies.
-import secrets
 import json
+from datetime import datetime
+from django.shortcuts import get_object_or_404
 from rest_framework import (
   generics, permissions, response
 )
@@ -8,14 +9,14 @@ from tools.Mail import (
   FormConfirmationMail, FormResponseMail
 )
 from .models import (
-  User, Form, Link, Input
+  User, Form, FormLink, Input
 )
 from .serializers import (
-  UserSerializer, FormSerializer, LinkSerializer, InputSerializer
+  UserSerializer, FormSerializer, FormLinkSerializer, InputSerializer
 )
 
 
-class FormList(generics.CreateAPIView):
+class FormListView(generics.CreateAPIView):
     """
     This is the endpoint that allows for creating forms.
     """
@@ -41,7 +42,7 @@ class FormList(generics.CreateAPIView):
             userSerializer.save()
 
         # Get access to the user object.
-        user = User.objects.get(email=request.data['email'])
+        user = get_object_or_404(User, email=request.data['email'])
 
         # Create a new form.
         formSerializer = FormSerializer(data={
@@ -50,59 +51,47 @@ class FormList(generics.CreateAPIView):
             'description': request.data['description']
         })
 
-        # Check that this is a valid form request.
-        if formSerializer.is_valid():
-
-            # Store the new form.
-            form = formSerializer.save()
-
-            # Add a message input to the form.
-            inputSerializer = InputSerializer(data={
-                'name': "Message",
-                'title': "Add a message to send to the form's owner.",
-                'form': form.id
-            })
-
-            # Check if the input is valid.
-            if inputSerializer.is_valid():
-
-                # If so, store it.
-                inputSerializer.save()
-
-            # We want to create a link with a unique key. We will keep trying
-            # until we get one.
-            while True:
-
-                # Attempt to create a link.
-                linkSerializer = LinkSerializer(data={
-                    'form': form.id,
-
-                    # We want to use the key in a URL, so it should be URL
-                    # safe. It needs to be long enough to be hard to guess and
-                    # short enough to be practical in a URL.
-                    'key': secrets.token_urlsafe(secrets.choice(range(16,
-                                                                      128)))
-                })
-
-                # If the link is valid that means the key is unique and we can
-                # escape the loop.
-                if linkSerializer.is_valid():
-
-                    # Store the link.
-                    link = linkSerializer.save()
-
-                    # Send a confirmation email.
-                    FormConfirmationMail().send(user, form)
-
-                    # Store the link and send it back to the client.
-                    return response.Response(link.key)
-
         # If it is not a valid form request, let the client know.
-        else:
+        if not formSerializer.is_valid():
             return response.Response(formSerializer.errors)
 
+        # Store the new form.
+        form = formSerializer.save()
 
-class FormResponse(generics.CreateAPIView):
+        # Add a message input to the form.
+        inputSerializer = InputSerializer(data={
+            'name': "Message",
+            'title': "Add a message to send to the form's owner.",
+            'form': form.id
+        })
+
+        # If it is not a input form request, let the client know.
+        if not inputSerializer.is_valid():
+            return response.Response(inputSerializer.errors)
+
+        # Otherwise, store it.
+        inputSerializer.save()
+
+        # Create a new link for this form.
+        formLinkSerializer = FormLinkSerializer(data={
+            'form': form.id
+        })
+
+        # If we cannot create a link, let the client know.
+        if not formLinkSerializer.is_valid():
+            return response.Response(formLinkSerializer.errors)
+
+        # Otherwise, store the link.
+        link = formLinkSerializer.save()
+
+        # Send a confirmation email.
+        FormConfirmationMail().send(user, form)
+
+        # Send the link back to the client.
+        return response.Response(link.key)
+
+
+class FormResponseView(generics.CreateAPIView):
     """
     This is the endpoint that processes a form response.
     """
@@ -116,7 +105,7 @@ class FormResponse(generics.CreateAPIView):
         """
 
         # Get the form.
-        form = Form.objects.get(id=request.data['form'])
+        form = get_object_or_404(Form, id=request.data['form'])
 
         # Send the response to the owner of the form.
         FormResponseMail().send(form.user, form, request.data['inputs'])
@@ -125,7 +114,7 @@ class FormResponse(generics.CreateAPIView):
         return response.Response(True)
 
 
-class FormDetail(generics.RetrieveUpdateDestroyAPIView):
+class FormDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     This is the endpoint that allows for retrieving, updating, and destroying
     individual forms.
@@ -142,57 +131,48 @@ class FormDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-class LinkList(generics.ListCreateAPIView):
+class FormLinkListView(generics.ListCreateAPIView):
     """
-    This is the endpoint that allows for listing and creating links.
+    This is the endpoint that allows for listing and creating links that link
+    to forms.
     """
 
     # We're using the Link objects.
-    queryset = Link.objects.all()
+    queryset = FormLink.objects.all()
 
     # We're using the Link serializer.
-    serializer_class = LinkSerializer
+    serializer_class = FormLinkSerializer
 
     # Only the user that owns them can list or create links.
     permission_classes = [permissions.IsAuthenticated]
 
 
-class LinkDetail(generics.RetrieveUpdateDestroyAPIView):
+class FormLinkDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     This is the endpoint that allows for retrieving, updating, and destroying
-    individual links.
+    individual links to forms.
     """
 
     # We're using the Link objects.
-    queryset = Link.objects.all()
+    queryset = FormLink.objects.all()
 
     # We're using the Link serializer.
-    serializer_class = LinkSerializer
+    serializer_class = FormLinkSerializer
 
     # Only the user that owns them can modify them.
     permission_classes = [permissions.IsAuthenticated]
 
 
-class ConfirmationLink(generics.RetrieveAPIView):
-    """
-    This is the endpoint that allows for retrieving individual confirmation
-    links.
-    """
-
-    # @todo: implement.
-    pass
-
-
-class FormLink(generics.RetrieveAPIView):
+class FormLinkView(generics.RetrieveAPIView):
     """
     This is the endpoint that allows for retrieving individual form links.
     """
 
     # We're using the Link objects.
-    queryset = Link.objects.all()
+    queryset = FormLink.objects.all()
 
     # We're using the Link serializer.
-    serializer_class = LinkSerializer
+    serializer_class = FormLinkSerializer
 
     # Everyone can view form links.
     permission_classes = [permissions.AllowAny]
@@ -203,32 +183,63 @@ class FormLink(generics.RetrieveAPIView):
         """
 
         # Get the link object.
-        link = Link.objects.get(key=key)
+        formLink = get_object_or_404(FormLink, key=key)
+
+        # Check if there's anything we should verify.
+        if (formLink.confirmation):
+
+            # Confirm the form if it has not yet been confirmed.
+            if formLink.form.confirmed is None:
+
+                # Update the form.
+                formSerializer = FormSerializer(
+                    formLink.form,
+                    data={'confirmed': datetime.now()},
+                    partial=True
+                )
+
+                # Save the form update if possible.
+                if formSerializer.is_valid():
+                    formSerializer.save()
+
+            # Verify the user if the user has not yet been verified.
+            if formLink.form.user.verified is None:
+
+                # Update the form's user.
+                userSerializer = UserSerializer(
+                    formLink.form.user,
+                    data={'verified': datetime.now()},
+                    partial=True
+                )
+
+                # Save the user update if possible.
+                if userSerializer.is_valid():
+                    userSerializer.save()
 
         # Construct the response object.
         result = {
 
             # We need to know which form needs to be submitted.
-            'id': link.form.id,
+            'id': formLink.form.id,
 
             # Add the form's name.
-            'name': link.form.name,
+            'name': formLink.form.name,
 
             # Add the form's description.
-            'description': link.form.description,
+            'description': formLink.form.description,
 
             # We need to know all inputs.
             'inputs': [{
                 'name': input.name,
                 'title': input.title
-            } for input in link.form.inputs.all()]
+            } for input in formLink.form.inputs.all()]
         }
 
         # Return the dictionary as a JSON object.
         return response.Response(json.dumps(result))
 
 
-class InputList(generics.ListCreateAPIView):
+class InputListView(generics.ListCreateAPIView):
     """
     This is the endpoint that allows for listing and creating inputs.
     """
@@ -244,7 +255,7 @@ class InputList(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-class InputDetail(generics.RetrieveUpdateDestroyAPIView):
+class InputDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     This is the endpoint that allows for retrieving, updating, and destroying
     individual inputs.

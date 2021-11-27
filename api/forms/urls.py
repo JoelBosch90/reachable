@@ -3,12 +3,12 @@ from . import views
 
 # This is where we list our API endpoints.
 urlpatterns = [
-    path("forms/", views.FormList.as_view()),
-    path("forms/response/", views.FormResponse.as_view()),
-    path("forms/<int:pk>", views.FormDetail.as_view()),
-    path("forms/link/<key>", views.FormLink.as_view()),
-    path("links/", views.LinkList.as_view()),
-    path("links/<key>", views.LinkDetail.as_view()),
-    path("inputs/", views.InputList.as_view()),
-    path("inputs/<int:pk>", views.InputDetail.as_view()),
+    path("forms/", views.FormListView.as_view()),
+    path("forms/response/", views.FormResponseView.as_view()),
+    path("forms/<int:pk>", views.FormDetailView.as_view()),
+    path("forms/link/<key>", views.FormLinkView.as_view()),
+    path("links/", views.FormLinkListView.as_view()),
+    path("links/<key>", views.FormLinkDetailView.as_view()),
+    path("inputs/", views.InputListView.as_view()),
+    path("inputs/<int:pk>", views.InputDetailView.as_view()),
 ]

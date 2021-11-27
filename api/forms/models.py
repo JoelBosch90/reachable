@@ -1,3 +1,5 @@
+import secrets
+import os
 from django.db import models
 
 
@@ -9,6 +11,10 @@ class User(models.Model):
 
     # Users are identified by their email address.
     email = models.CharField(max_length=320, unique=True, primary_key=True)
+
+    # Flag to record when (if ever) ownership of the email address was
+    # verified.
+    verified = models.DateTimeField(null=True)
 
     def __str__(self):
         """
@@ -38,6 +44,9 @@ class Form(models.Model):
     # about the form to themselves.
     description = models.CharField(max_length=1024, blank=True, null=True)
 
+    # Flag to record when (if ever) this form was confirmed by the user.
+    confirmed = models.DateTimeField(null=True)
+
     class Meta:
         """
         Extra settings for the Form class.
@@ -58,28 +67,81 @@ class Form(models.Model):
 
 class Link(models.Model):
     """
-    This model represents a link. A link is always tied to a single form, and
-    is used to access that form. A single form can have multiple links to allow
-    users to identify.
+    This base model represents a link. This base class holds a unique URL-safe
+    key that can be used to link to something. Typically, you'll use an
+    extending class to link to something useful.
+    """
+
+    def generate_key():
+        """
+        Method to generate a unique key for this link.
+        """
+
+        # While unlikely, it is possible that the first key we create is not
+        # unique. In such a case, we want to keep trying.
+        while True:
+
+            # We want to use the key in a URL, so it should be URL
+            # safe. It needs to be long enough to be hard to guess and
+            # short enough to be practical in a URL.
+            key = secrets.token_urlsafe(secrets.choice(range(16, 128)))
+
+            # Make sure that there is no other link that uses this key.
+            if (not Link.objects.filter(key=key).exists()):
+                return key
+
+    # A link is identified by this key. Every link should be unique, regardless
+    # of the form it is attached to. It should have a reasonable length to fit
+    # a URL.
+    key = models.CharField(max_length=128, primary_key=True,
+                           default=generate_key)
+
+    def __str__(self):
+        """
+        Converts a link to a string representation.
+        """
+
+        # The key should be unique, and is already a string.
+        return self.key
+
+
+class FormLink(Link):
+    """
+    This model represents a link to a form. This type of link is always tied to
+    a single form, and is used to access that form. A single form can have
+    multiple links to allow users to identify different types of traffic.
+
+    Optionally, this link can be used to confirm the form and the user. Because
+    anyone can create a form for any email address, we should first make sure
+    that the owner of the email address wants to receive the form's responses.
+    We can do that by sending a unique form link with the confirmation flag set
+    to True to their email address. As soon as the receiver clicks this link,
+    both the form and the user will be verified and activated.
     """
 
     # A link is always tied to a single form.
     form = models.ForeignKey(Form, related_name='links',
                              on_delete=models.CASCADE)
 
-    # A link is identified by this key. Every link should be unique, regardless
-    # of the form it is attached to. It should have a reasonable length to fit
-    # a URL.
-    key = models.CharField(max_length=128, primary_key=True)
+    # Should this link be used to confirm the associated form and user?
+    confirmation = models.BooleanField(default=False)
+
+    def url(self):
+        """
+        Method to generate a URL for this link.
+        """
+
+        # Construct a URL with the key for this link.
+        return f"{os.getenv('CLIENT_URL')}form/{self.key}"
 
     def __str__(self):
         """
-        Converts the link model to a string representation.
+        Converts a form's link to a string representation.
         """
 
         # We can combine the link's key, which should be unique. For
         # convenience, we also add the form it links to.
-        return self.key + ':' + str(self.form)
+        return super().__str__() + ':' + str(self.form)
 
 
 class Input(models.Model):

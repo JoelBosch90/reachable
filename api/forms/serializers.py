@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Form, Link, Input
+from .models import User, Form, Link, FormLink, Input
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
     forms = serializers.SlugRelatedField(
         many=True,
         read_only=True,
-        slug_field='name'
+        slug_field='name',
     )
 
     class Meta:
@@ -23,6 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             "email",
             "forms",
+            "verified",
         ]
 
 
@@ -35,12 +36,12 @@ class FormSerializer(serializers.ModelSerializer):
     inputs = serializers.SlugRelatedField(
         many=True,
         read_only=True,
-        slug_field='name'
+        slug_field='name',
     )
     links = serializers.SlugRelatedField(
         many=True,
         read_only=True,
-        slug_field='key'
+        slug_field='key',
     )
 
     class Meta:
@@ -56,26 +57,28 @@ class FormSerializer(serializers.ModelSerializer):
             "description",
             "inputs",
             "links",
+            "confirmed",
         ]
         extra_kwargs = {
-            "description": {"required": False}
+            "description": {"required": False},
         }
 
 
-class LinkSerializer(serializers.ModelSerializer):
+class FormLinkSerializer(serializers.ModelSerializer):
     """
-    This serializer knows how to construct a Link object.
+    This serializer knows how to construct a FormLink object.
     """
 
     class Meta:
         """
-        Specification of how the Link model is serialized.
+        Specification of how the FormLink model is serialized.
         """
 
-        model = Link
+        model = FormLink
         fields = [
             "form",
             "key",
+            "confirmation",
         ]
 
 
@@ -96,5 +99,5 @@ class InputSerializer(serializers.ModelSerializer):
             "title",
         ]
         extra_kwargs = {
-            "title": {"required": False}
+            "title": {"required": False},
         }

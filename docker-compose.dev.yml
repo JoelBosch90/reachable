@@ -70,8 +70,9 @@ services:
 
     # Pass on the environment variables to the client service.
     environment:
-      # Tell the client where to reach the API.
+      # Tell the client where to reach the client and the API.
       - API_URL=http://localhost:8004/api/
+      - CLIENT_URL=http://localhost:8004/
 
     # We can expose the client service in the container network.
     expose:
@@ -108,7 +109,8 @@ services:
     # that is not set in this file is expected to be supplied through
     # environment variables.
     environment:
-      # Tell the API where to reach the client.
+      # Tell the API where to reach the client and the API.
+      - API_URL=http://localhost:8004/api/
       - CLIENT_URL=http://localhost:8004/
 
       # Tell the API how to connect to the database.
