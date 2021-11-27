@@ -159,7 +159,8 @@ services:
   database:
     container_name: reachable.database.development
 
-    # We can pull the latest MongoDB version.
+    # We can pull the latest MongoDB version. Running this older version because
+    # my local machine lacks the AVX support for Mongo 5+.
     image: mongo:4.4.6
 
     # We can expose the default MongoDB port database service in the proxy
@@ -185,7 +186,7 @@ services:
       test: echo 'db.runCommand("ping").ok' | mongo database:27017/test --quiet
 
       # The interval with which to perform the health check.
-      interval: 15s
+      interval: 10s
 
       # If a check takes longer than 10 seconds, we consider it failed.
       timeout: 10s
@@ -194,7 +195,8 @@ services:
       retries: 3
 
       # We give the database 30 seconds to start up on initialization before we
-      # start declaring it un
+      # start declaring it unhealthy.
+      start_period: 30s
 
     # We want to try and restart the database if any issues arise.
     restart: unless-stopped

@@ -12,7 +12,4 @@ djongo
 django-rest-framework
 
 # Install the development tools.
-black
-pylint
-pylint-django
 drf_spectacular

@@ -15,37 +15,84 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Form',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False)),
-                ('name', models.CharField(default='Form', max_length=256)),
-                ('description', models.CharField(blank=True, max_length=1024, null=True)),
+                ('id', models.AutoField(
+                    primary_key=True,
+                    serialize=False
+                )),
+                ('name', models.CharField(
+                    default='Form',
+                    max_length=256
+                )),
+                ('description', models.CharField(
+                    blank=True,
+                    max_length=1024,
+                    null=True
+                )),
             ],
         ),
         migrations.CreateModel(
             name='User',
             fields=[
-                ('email', models.CharField(max_length=320, primary_key=True, serialize=False, unique=True)),
+                ('email', models.CharField(
+                    max_length=320,
+                    primary_key=True,
+                    serialize=False,
+                    unique=True
+                )),
             ],
         ),
         migrations.CreateModel(
             name='Link',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('key', models.CharField(max_length=128, null=True, unique=True)),
-                ('form', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='links', to='forms.form')),
+                ('id', models.BigAutoField(
+                    auto_created=True,
+                    primary_key=True,
+                    serialize=False,
+                    verbose_name='ID'
+                )),
+                ('key', models.CharField(
+                    max_length=128,
+                    null=True,
+                    unique=True
+                )),
+                ('form', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name='links',
+                    to='forms.form'
+                )),
             ],
         ),
         migrations.AddField(
             model_name='form',
             name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='forms', to='forms.user'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='forms',
+                to='forms.user'
+            ),
         ),
         migrations.CreateModel(
             name='Input',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=256)),
-                ('title', models.CharField(blank=True, max_length=512, null=True)),
-                ('form', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='inputs', to='forms.form')),
+                ('id', models.BigAutoField(
+                    auto_created=True,
+                    primary_key=True,
+                    serialize=False,
+                    verbose_name='ID'
+                )),
+                ('name', models.CharField(
+                    max_length=256
+                )),
+                ('title', models.CharField(
+                    blank=True,
+                    max_length=512,
+                    null=True
+                )),
+                ('form', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE,
+                    related_name='inputs',
+                    to='forms.form'
+                )),
             ],
             options={
                 'unique_together': {('form', 'name')},
