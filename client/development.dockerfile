@@ -1,5 +1,5 @@
 # Use the latest version of Node.
-FROM node:current
+FROM node:16-alpine3.14
 
 # Create the working directory and give ownership to the node user.
 RUN mkdir -p /client && chown -R node:node /client

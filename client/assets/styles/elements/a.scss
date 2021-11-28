@@ -1,0 +1,23 @@
+/**
+ *  Default styling for the <a> element.
+ */
+a
+{
+  // Animate the changes for the hover and focus effects.
+  transition: all var(--quick-animation);
+  transition-property: background-color, filter;
+
+  // Target the anchor tag when hovered over.
+  &:hover
+  {
+    // Make the tag brighter on hover.
+    filter: brightness(125%);
+  }
+
+  // Taget the anchor tag when focused.
+  &:focus
+  {
+    // Give it the active colour to show this element is selected.
+    background-color: var(--active);
+  }
+}

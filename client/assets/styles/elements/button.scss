@@ -1,0 +1,53 @@
+/**
+ *  Default styling for the <button> element.
+ */
+button
+{
+  // Use the normal font size.
+  font-size: 1em;
+
+  // We don't need borders for these buttons.
+  border: none;
+
+  // Use a light colour for the text.
+  color: var(--white);
+
+  // Use the navigation colour by default.
+  background-color: var(--navigation);
+
+  // Give buttons rounded corners to give them a friendlier look.
+  border-radius: .75em;
+
+  // Make the buttons a little larger to make them easier to click.
+  padding: .5em 1em;
+
+  // Add a special class to create round buttons.
+  &.round
+  {
+    // Even out the padding.
+    padding: 1em;
+
+    // Make the button round.
+    border-radius: 50%;
+  }
+
+  // Add an on hover effect.
+  &:hover
+  {
+    // Make the button look a little lighter.
+    filter: brightness(125%);
+
+    // Show that this is an interactive element.
+    cursor: pointer;
+  }
+
+  // Add an on focus effect.
+  &:focus
+  {
+    // Remove the browser default.
+    outline: none;
+
+    // Use the active colour.
+    background-color: var(--active);
+  }
+}

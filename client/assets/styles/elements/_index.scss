@@ -1,0 +1,15 @@
+/**
+ *  We use this file to gather all styles within the `elements` directory for
+ *  easy importing. That means this file basically just lists all styling files
+ *  in this directory.
+ *
+ *  For this directory, we want to define defaults for all HTML elements. We
+ *  want to make sure that all basic HTML elements look great and coherent with
+ *  the general styles of the application by default, but we don't want to add
+ *  too many styles so we don't force too many overrides later on.
+ */
+@use 'a';
+@use 'body';
+@use 'button';
+@use 'h1';
+@use 'p';

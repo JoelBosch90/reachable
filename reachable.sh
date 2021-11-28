@@ -78,7 +78,7 @@ runDevelopment () {
   rm -f ~/.docker/config.json
 
   # Spin up the Docker Compose network with the development settings.
-  docker-compose -f docker-compose.dev.yml up --build
+  docker-compose -f docker-compose.dev.yml up $1
 }
 
 ################################################################################
@@ -97,7 +97,7 @@ runProduction () {
   rm -f ~/.docker/config.json
 
   # Spin up the Docker Compose network with the production settings.
-  docker-compose up --build
+  docker-compose up $1
 }
 
 ################################################################################
@@ -179,14 +179,14 @@ while [[ $# -gt 0 ]]; do
     # Run `reachable development` to run a local development instance of the
     # Reachable application.
     d|dev|development)
-      runDevelopment
+      runDevelopment "$argument"
       shift # Get ready to process the next command.
       ;;
 
     # Run `reachable stable` to run a local example of the stable release
     # of the Reachable application.
     s|stable)
-      runProduction
+      runProduction "$argument"
       shift # Get ready to process the next command.
       ;;
   esac

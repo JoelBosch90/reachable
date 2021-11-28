@@ -15,7 +15,12 @@ export default {
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
+    // Import our own styles.
+    '~/assets/styles/main.scss'
   ],
+
+  // Make sure we reload when SCSS files are changed.
+  watch: ['~/assets/*.scss'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
@@ -34,11 +39,11 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/axios
-    '@nuxtjs/axios',
+    '@nuxtjs/axios'
     // https://github.com/nuxt-community/proxy-module
     // '@nuxtjs/proxy',
     // https://go.nuxtjs.dev/pwa
-    '@nuxtjs/pwa'
+    // '@nuxtjs/pwa'
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
