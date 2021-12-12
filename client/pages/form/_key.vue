@@ -1,13 +1,15 @@
 <template>
-  <main>
-    <h2>
-      {{ name }}
-    </h2>
-    <p>
-      {{ description }}
-    </p>
-    <Form :id="id" :fields="fields" />
-  </main>
+  <v-app>
+    <v-card>
+      <h2>
+        {{ name }}
+      </h2>
+      <p>
+        {{ description }}
+      </p>
+      <Form-old :id="id" :fields="fields" />
+    </v-card>
+  </v-app>
 </template>
 
 <script>

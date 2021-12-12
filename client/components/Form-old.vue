@@ -1,22 +1,24 @@
 <template>
-  <section>
-    <p v-if="sent">
+  <v-card>
+    <v-card-text v-if="sent">
       Thank you for your response! The owner of this form has been notified.
-    </p>
-    <form v-else @submit.prevent="respond">
-      <input
+    </v-card-text>
+    <v-form v-else @submit.prevent="respond">
+      <v-text-field
         v-for="field in fields"
         :key="field.name"
         v-model="inputs[field.name]"
         :name="field.name"
         :title="field.title"
-      >
-      <button>Submit</button>
+      />
+      <v-card-actions>
+        <v-btn>Submit</v-btn>
+      </v-card-actions>
       <p v-if="error">
         {{ error }}
       </p>
-    </form>
-  </section>
+    </v-form>
+  </v-card>
 </template>
 
 <script>

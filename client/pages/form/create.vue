@@ -1,5 +1,7 @@
 <template>
-  <FormCreate />
+  <v-app>
+    <CreateForm />
+  </v-app>
 </template>
 
 <script>
