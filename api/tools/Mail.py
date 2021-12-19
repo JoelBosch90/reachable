@@ -42,16 +42,18 @@ class FormConfirmationMail:
         # Save the serializer to get the confirmation link.
         confirmationLink = formLinkSerializer.save().url()
 
+        message = "Congratulations on creating your new form!\n\nClick" \
+                  " here to start accepting new submissions for the" \
+                  f"'{form.name} form'.\n\nVisit the following link to" \
+                  " confirm your email address and activate this form:\n" \
+                  f"{confirmationLink}\n\nEnjoy your form!" \
+                  "\n\nGreetings,\nYour friends @ Reachable"
+
         send_mail(
 
             # Construct a confirmation message.
-            # @todo: add links to both the form and the confirmation page.
             subject=f"Confirm your '{form.name}' form.",
-            message="Congratulations on creating your new form!\n\nClick" \
-                    " here to start accepting new submissions for the" \
-                    f"'{form.name} form'.\n\nVisit the following link to" \
-                    " confirm your email address and activate this form:\n" \
-                    f"{confirmationLink}\n\nEnjoy your form!",
+            message=message,
 
             # Send a single email to the user.
             recipient_list=[user.email],
@@ -77,16 +79,19 @@ class FormResponseMail:
 
         # Add an introduction to the message.
         message = "Hey there, form builder!\n\nYou just received a new" \
-                  " submission for your '" + form.name + "' form:\n\n"
+                  f" submission for your '{form.name}' form:\n\n"
 
         # Now list out the name and submission text for every input.
-        message += "\n\n".join(name + "\n" + text
+        message += "\n\n".join(f"{name}\n{text}"
                                for name, text in inputs.items())
+
+        # Add a closing greeting to the mail.
+        message += "\n\nGreetings,\nYour friends @ Reachable"
 
         send_mail(
 
             # Add a subject.
-            subject="Form submission for the '" + form.name + "' form.",
+            subject=f"Form submission for the '{form.name}' form.",
 
             # Add our message.
             message=message,
