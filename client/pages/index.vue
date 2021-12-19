@@ -1,6 +1,8 @@
 <template>
   <v-app>
-    <CreateForm />
+    <v-container>
+      <CreateForm />
+    </v-container>
   </v-app>
 </template>
 

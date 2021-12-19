@@ -1,41 +1,38 @@
 <template>
-  <v-card
-    width="50%"
-    class="mx-auto mt-5"
-  >
+  <v-card>
     <v-card-title>
       <h1 class="display-1">
         Create new form
       </h1>
     </v-card-title>
     <v-card-text>
-      <GenericForm
+      <Form
         ref="form"
         v-model="form"
         @submit="createLink"
       >
-        <GenericFormInput
+        <FormInput
           v-model="form.name"
           :label="inputs.name.label"
           :required="inputs.name.required"
           :rules="inputs.name.rules"
           :hint="inputs.name.hint"
         />
-        <GenericFormInput
+        <FormInput
           v-model="form.description"
           :label="inputs.description.label"
           :required="inputs.description.required"
           :rules="inputs.description.rules"
           :hint="inputs.description.hint"
         />
-        <GenericFormInput
+        <FormInput
           v-model="form.email"
           :label="inputs.email.label"
           :required="inputs.email.required"
           :rules="inputs.email.rules"
           :hint="inputs.email.hint"
         />
-      </GenericForm>
+      </Form>
     </v-card-text>
   </v-card>
 </template>

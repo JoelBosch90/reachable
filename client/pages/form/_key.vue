@@ -1,6 +1,8 @@
 <template>
   <v-app>
-    <ResponseForm />
+    <v-container>
+      <ResponseForm />
+    </v-container>
   </v-app>
 </template>
 

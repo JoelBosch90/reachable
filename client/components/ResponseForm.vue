@@ -1,8 +1,5 @@
 <template>
-  <v-card
-    width="50%"
-    class="mx-auto mt-5"
-  >
+  <v-card>
     <v-card-title>
       <h1 class="display-1">
         {{ form.name }}
@@ -19,12 +16,12 @@
       <p>
         {{ form.description }}
       </p>
-      <GenericForm
+      <Form
         ref="form"
         v-model="form"
         @submit="respond"
       >
-        <GenericFormInput
+        <FormInput
           v-for="input in form.inputs"
           :key="input.name"
           v-model="response[input.name]"
@@ -32,7 +29,7 @@
           :hint="input.title"
           :required="true"
         />
-      </GenericForm>
+      </Form>
     </v-card-text>
     <v-card-text
       v-else
