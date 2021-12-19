@@ -52,14 +52,8 @@ export default {
       // Get the information about the form.
       const response = await this.$axios.get('forms/link/' + this.$route.params.key)
 
-      // Extra the data from the response.
-      const data = JSON.parse(response.data)
-
-      // Load all data.
-      this.form.description = data.description
-      this.form.name = data.name
-      this.form.id = data.id
-      this.form.inputs = data.inputs
+      // Extract the data from the response.
+      this.form = JSON.parse(response.data)
     },
     // Method to send a response with the current form submission.
     async respond () {

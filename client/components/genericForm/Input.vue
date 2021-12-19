@@ -4,6 +4,7 @@
     :label="label"
     :required="required"
     :hint="hint"
+    :rules="rules"
     @input="onInput"
   />
 </template>
@@ -30,6 +31,16 @@ export default {
     value: {
       type: String,
       default: ''
+    },
+    // Set the validation rules.
+    rules: {
+      type: Array,
+      default () {
+        return [
+          // Check if we have input if that is required.
+          value => this.required ? !!value || 'This field is required' : true
+        ]
+      }
     }
   },
   data () {

@@ -15,18 +15,24 @@
       >
         <GenericFormInput
           v-model="form.name"
-          :label="'Name'"
-          :required="true"
+          :label="inputs.name.label"
+          :required="inputs.name.required"
+          :rules="inputs.name.rules"
+          :hint="inputs.name.hint"
         />
         <GenericFormInput
           v-model="form.description"
-          :label="'Description'"
-          :required="false"
+          :label="inputs.description.label"
+          :required="inputs.description.required"
+          :rules="inputs.description.rules"
+          :hint="inputs.description.hint"
         />
         <GenericFormInput
           v-model="form.email"
-          :label="'Email addresss'"
-          :required="true"
+          :label="inputs.email.label"
+          :required="inputs.email.required"
+          :rules="inputs.email.rules"
+          :hint="inputs.email.hint"
         />
       </GenericForm>
     </v-card-text>
@@ -41,6 +47,32 @@ export default {
         name: '',
         description: '',
         email: ''
+      },
+      inputs: {
+        name: {
+          label: 'Name',
+          rules: [
+            value => !!value || 'Please name your form.'
+          ],
+          hint: 'This name is used in the form and in your UI.',
+          required: true
+        },
+        description: {
+          label: 'Description',
+          rules: [],
+          hint: 'This description will be shown near your form.',
+          required: false
+        },
+        email: {
+          label: 'Email address',
+          rules: [
+            value => !!value || 'Please supply an email address to which we can send this form\'s responses.',
+            // Use a simple regex to check for the presence of an @-symbol and a dot in the domain name.
+            value => /.+@.+\..+/.test(value) || 'Please supply a valid email address.'
+          ],
+          hint: 'Any responses to this form will be sent to this email address.',
+          required: true
+        }
       }
     }
   },
