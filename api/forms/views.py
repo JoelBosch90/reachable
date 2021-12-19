@@ -216,6 +216,10 @@ class FormLinkView(generics.RetrieveAPIView):
                 if userSerializer.is_valid():
                     userSerializer.save()
 
+        # If the form has not been confirmed, we should not show it.
+        if (not formLink.form.confirmed):
+          return response.Response(False)
+
         # Construct the response object.
         result = {
 

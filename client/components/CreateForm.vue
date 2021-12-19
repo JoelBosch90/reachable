@@ -10,6 +10,7 @@
     </v-card-title>
     <v-card-text>
       <GenericForm
+        ref="form"
         v-model="form"
         @submit="createLink"
       >
@@ -83,13 +84,16 @@ export default {
       // Create the form, and get the key.
       const response = await this.$axios.post('forms/', this.form)
 
-      // Redirect the user to the new form.
-      this.$router.push({
-        name: 'form-key',
-        params: {
-          key: response.data
-        }
-      })
+      // Make sure we have data, then redirect the user to the new form.
+      if (response && response.data) {
+        this.$router.push({
+          name: 'form-key',
+          params: {
+            key: response.data
+          }
+        })
+      // Otherwise, something has gone wrong and we should tell the user.
+      } else { this.$refs.form.showError('Error occurred: your form could not be created.') }
     }
   }
 }

@@ -9,7 +9,12 @@
       </h1>
     </v-card-title>
     <v-card-text
-      v-if="!responded"
+      v-if="error"
+    >
+      {{ error }}
+    </v-card-text>
+    <v-card-text
+      v-else-if="!responded"
     >
       <p>
         {{ form.description }}
@@ -48,12 +53,12 @@ export default {
         name: '',
         description: '',
         id: 0,
-        inputs: [],
-        error: ''
+        inputs: []
       },
       // This is the input that the user has added to the form.
       response: {},
-      responded: false
+      responded: false,
+      error: ''
     }
   },
   mounted () {
@@ -63,11 +68,25 @@ export default {
   methods: {
     // Method to load the form from from the server.
     async load () {
-      // Get the information about the form.
-      const response = await this.$axios.get('forms/link/' + this.$route.params.key)
+      try {
+        // Get the information about the form.
+        const response = await this.$axios.get('forms/link/' + this.$route.params.key)
 
-      // Extract the data from the response.
-      this.form = JSON.parse(response.data)
+        // If we cannot get the form, we should throw an error.
+        if (!response || !response.data) {
+          throw new Error('Invalid response')
+
+        // Otherwise, extract the data from the response to populate the form.
+        } else { this.form = JSON.parse(response.data) }
+
+      // If we cannot load the form, we should just go tell the user that we
+      // cannot find the form.
+      } catch (error) {
+        this.$nuxt.error({
+          statusCode: 404,
+          message: 'This form could not be found.'
+        })
+      }
     },
     // Method to send a response with the current form submission.
     async respond () {
@@ -79,7 +98,7 @@ export default {
 
       // If we got a valid response, we can show the user that the response has
       // been properly processed.
-      if (response) {
+      if (response && response.data) {
         this.responded = true
 
       // If we didn't get a valid response, something went wrong server-side. We
