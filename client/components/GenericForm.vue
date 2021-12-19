@@ -4,19 +4,22 @@
     v-model="valid"
     @submit.prevent="onSubmit"
   >
-    <v-container>
-      <slot />
-    </v-container>
-    <v-card-actions>
-      <v-btn
-        type="submit"
-        color="success"
-        :disabled="!valid"
-        @click="validate"
-      >
-        Submit
-      </v-btn>
-    </v-card-actions>
+    <p
+      v-show="error"
+      class="error--text"
+    >
+      {{ error }}
+    </p>
+    <slot />
+    <v-btn
+      type="submit"
+      color="success"
+      class="mt-4"
+      :disabled="!valid"
+      @click="validate"
+    >
+      Submit
+    </v-btn>
   </v-form>
 </template>
 
@@ -32,7 +35,8 @@ export default {
     return {
       // The form is invalid by default. We assume there should be some kind of
       // input for a useful form.
-      valid: false
+      valid: false,
+      error: ''
     }
   },
   methods: {
@@ -43,6 +47,11 @@ export default {
     // Use Vuetify to validate the form.
     validate () {
       this.$refs.form.validate()
+    },
+    // Parent components can call this method to show an error message on the
+    // form.
+    showError (message) {
+      this.error = message || 'An unknown error has occurred.'
     }
   }
 }

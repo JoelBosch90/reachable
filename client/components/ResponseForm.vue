@@ -8,9 +8,14 @@
         {{ form.name }}
       </h1>
     </v-card-title>
-    <v-card-text>
-      <p>{{ form.description }}</p>
+    <v-card-text
+      v-if="!responded"
+    >
+      <p>
+        {{ form.description }}
+      </p>
       <GenericForm
+        ref="form"
         v-model="form"
         @submit="respond"
       >
@@ -24,6 +29,13 @@
         />
       </GenericForm>
     </v-card-text>
+    <v-card-text
+      v-else
+    >
+      Your response has been sent to the form's owner.
+      <br>
+      Thank you for responding!
+    </v-card-text>
   </v-card>
 </template>
 
@@ -36,10 +48,12 @@ export default {
         name: '',
         description: '',
         id: 0,
-        inputs: []
+        inputs: [],
+        error: ''
       },
       // This is the input that the user has added to the form.
-      response: {}
+      response: {},
+      responded: false
     }
   },
   mounted () {
@@ -58,10 +72,21 @@ export default {
     // Method to send a response with the current form submission.
     async respond () {
       // Send the response.
-      await this.$axios.post('forms/response/', {
+      const response = await this.$axios.post('forms/response/', {
         form: this.form.id,
         inputs: this.response
       })
+
+      // If we got a valid response, we can show the user that the response has
+      // been properly processed.
+      if (response) {
+        this.responded = true
+
+      // If we didn't get a valid response, something went wrong server-side. We
+      // should tell the user that something has gone wrong.
+      } else {
+        this.$refs.form.showError('Error occurred: your response could not be sent.')
+      }
     }
   }
 }

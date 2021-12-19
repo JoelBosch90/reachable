@@ -60,7 +60,7 @@ export default {
         description: {
           label: 'Description',
           rules: [],
-          hint: 'This description will be shown near your form.',
+          hint: 'This description will be shown near your form. You can use this to explain the form\'s purpose or ask questions to your respondents.',
           required: false
         },
         email: {
