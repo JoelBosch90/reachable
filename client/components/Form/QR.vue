@@ -6,21 +6,51 @@
       </h1>
     </v-card-title>
     <v-img
-      src="someqrcode.png"
-    />
+      content-class="r-center"
+    >
+      <client-only>
+        <vue-qrious
+          ref="qr"
+          :size="size"
+          :value="link"
+          :padding="padding"
+          :level="level"
+          :mime="mime"
+        />
+      </client-only>
+    </v-img>
     <v-card-text>
       QR code that links to your form.
     </v-card-text>
-    <v-card-actions>
-      <v-btn
-        color="info"
-      >
-        Copy
-      </v-btn>
-    </v-card-actions>
   </v-card>
 </template>
 
 <script>
-export default {}
+import VueQrious from 'vue-qrious'
+export default {
+  components: {
+    VueQrious
+  },
+  props: {
+    link: {
+      type: String,
+      default: ''
+    }
+  },
+  data () {
+    return {
+      size: 215,
+      level: 'H',
+      padding: 30,
+      mime: 'image/png'
+    }
+  }
+}
 </script>
+
+<style>
+.r-center {
+  display: flex;
+  justify-content: center;
+}
+</style>
