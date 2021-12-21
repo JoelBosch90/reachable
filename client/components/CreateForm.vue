@@ -84,7 +84,7 @@ export default {
       // Make sure we have data, then redirect the user to the new form.
       if (response && response.data) {
         this.$router.push({
-          name: 'form-key',
+          name: 'form-created-key',
           params: {
             key: response.data
           }

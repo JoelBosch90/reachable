@@ -44,7 +44,7 @@ class FormConfirmationMail:
 
         message = "Congratulations on creating your new form!\n\nClick" \
                   " here to start accepting new submissions for the" \
-                  f"'{form.name} form'.\n\nVisit the following link to" \
+                  f" '{form.name}' form.\n\nVisit the following link to" \
                   " confirm your email address and activate this form:\n" \
                   f"{confirmationLink}\n\nEnjoy your form!" \
                   "\n\nGreetings,\nYour friends @ Reachable"

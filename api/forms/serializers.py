@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Form, Link, FormLink, Input
+from .models import TimeStamped, User, Form, Link, FormLink, Input
 
 
 class UserSerializer(serializers.ModelSerializer):

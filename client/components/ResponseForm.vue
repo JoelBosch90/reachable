@@ -71,7 +71,11 @@ export default {
 
         // If we cannot get the form, we should throw an error.
         if (!response || !response.data) {
-          throw new Error('Invalid response')
+          throw new Error('invalid')
+
+        // Check if we're dealing with an expired link.
+        } else if (response.data === 'expired') {
+          throw new Error('expired')
 
         // Otherwise, extract the data from the response to populate the form.
         } else { this.form = JSON.parse(response.data) }
@@ -79,10 +83,20 @@ export default {
       // If we cannot load the form, we should just go tell the user that we
       // cannot find the form.
       } catch (error) {
-        this.$nuxt.error({
-          statusCode: 404,
-          message: 'This form could not be found.'
-        })
+        // Redirect to 404 in case of an invalid error.
+        if (error.message === 'invalid') {
+          this.$nuxt.error({
+            statusCode: 404,
+            message: 'This form could not be found.'
+          })
+
+        // Redirect to 498 in case of an expired link.
+        } else if (error.message === 'expired') {
+          this.$nuxt.error({
+            statusCode: 498,
+            message: 'This link has expired.'
+          })
+        }
       }
     },
     // Method to send a response with the current form submission.

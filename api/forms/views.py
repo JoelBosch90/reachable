@@ -1,6 +1,6 @@
 # Import dependencies.
 import json
-from datetime import datetime
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import (
   generics, permissions, response
@@ -185,6 +185,10 @@ class FormLinkView(generics.RetrieveAPIView):
         # Get the link object.
         formLink = get_object_or_404(FormLink, key=key)
 
+        # Check if the link has expired.
+        if (formLink.expires < timezone.now()):
+           return response.Response('expired')
+
         # Check if there's anything we should verify.
         if (formLink.confirmation):
 
@@ -194,7 +198,7 @@ class FormLinkView(generics.RetrieveAPIView):
                 # Update the form.
                 formSerializer = FormSerializer(
                     formLink.form,
-                    data={'confirmed': datetime.now()},
+                    data={'confirmed': timezone.now()},
                     partial=True
                 )
 
@@ -208,7 +212,7 @@ class FormLinkView(generics.RetrieveAPIView):
                 # Update the form's user.
                 userSerializer = UserSerializer(
                     formLink.form.user,
-                    data={'verified': datetime.now()},
+                    data={'verified': timezone.now()},
                     partial=True
                 )
 

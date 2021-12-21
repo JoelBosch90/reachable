@@ -1,10 +1,23 @@
 import secrets
 import os
 from django.db import models
+from django.utils import timezone
+from datetime import timedelta
+
+
+class TimeStamped(models.Model):
+    """
+    Abstract base class to add time stamps to models.
+    """
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
 
 
 # Create your models here.
-class User(models.Model):
+class User(TimeStamped):
     """
     This model represents a single user.
     """
@@ -25,7 +38,7 @@ class User(models.Model):
         return self.email
 
 
-class Form(models.Model):
+class Form(TimeStamped):
     """
     This model represents a single form.
     """
@@ -65,7 +78,7 @@ class Form(models.Model):
         return self.name + ':' + str(self.user)
 
 
-class Link(models.Model):
+class Link(TimeStamped):
     """
     This base model represents a link. This base class holds a unique URL-safe
     key that can be used to link to something. Typically, you'll use an
@@ -95,6 +108,17 @@ class Link(models.Model):
     # a URL.
     key = models.CharField(max_length=128, primary_key=True,
                            default=generate_key)
+
+    def default_expire_date():
+      """
+      Method to calculate the default expire date.
+      """
+
+      # By default, links should last about half a year.
+      return timezone.now() + timedelta(180)
+
+    # Always set an expire date on links. We shouldn't keep these forever.
+    expires = models.DateTimeField(default=default_expire_date)
 
     def __str__(self):
         """
@@ -144,7 +168,7 @@ class FormLink(Link):
         return super().__str__() + ':' + str(self.form)
 
 
-class Input(models.Model):
+class Input(TimeStamped):
     """
     This model represents a user.
     """
