@@ -24,14 +24,14 @@ class FormListView(generics.CreateAPIView):
     # Everyone can create forms.
     permission_classes = [permissions.AllowAny]
 
-    def post(self, request, format=None):
+    def __get_user(self, email):
         """
-        Create a new form.
+        Private method to get access to a user.
         """
 
         # Create a serializer for the user.
         userSerializer = UserSerializer(data={
-            'email': request.data['email']
+            'email': email
         })
 
         # If the serializer is valid, that means that a user with this email
@@ -42,26 +42,36 @@ class FormListView(generics.CreateAPIView):
             userSerializer.save()
 
         # Get access to the user object.
-        user = get_object_or_404(User, email=request.data['email'])
+        return get_object_or_404(User, email=email)
+
+    def __create_form(self, user, name, description):
+        """
+        Private method to create a form.
+        """
 
         # Create a new form.
         formSerializer = FormSerializer(data={
             'user': user.email,
-            'name': request.data['name'],
-            'description': request.data['description']
+            'name': name,
+            'description': description
         })
 
         # If it is not a valid form request, let the client know.
         if not formSerializer.is_valid():
             return response.Response(formSerializer.errors)
 
-        # Store the new form.
-        form = formSerializer.save()
+        # Store and return the new form.
+        return formSerializer.save()
+
+    def __create_input(self, form, name, title):
+        """
+        Private method to create an input.
+        """
 
         # Add a message input to the form.
         inputSerializer = InputSerializer(data={
-            'name': "Message",
-            'title': "Add a message to send to the form's owner.",
+            'name': name,
+            'title': title,
             'form': form.id
         })
 
@@ -69,8 +79,13 @@ class FormListView(generics.CreateAPIView):
         if not inputSerializer.is_valid():
             return response.Response(inputSerializer.errors)
 
-        # Otherwise, store it.
-        inputSerializer.save()
+        # Otherwise, store and return it.
+        return inputSerializer.save()
+
+    def __create_link(self, form):
+        """
+        Private method to create a link.
+        """
 
         # Create a new link for this form.
         formLinkSerializer = FormLinkSerializer(data={
@@ -81,8 +96,39 @@ class FormListView(generics.CreateAPIView):
         if not formLinkSerializer.is_valid():
             return response.Response(formLinkSerializer.errors)
 
-        # Otherwise, store the link.
-        link = formLinkSerializer.save()
+        # Otherwise, store and return the link.
+        return formLinkSerializer.save()
+
+    def post(self, request, format=None):
+        """
+        Create a new form.
+        """
+
+        # Get access to the user object.
+        user = self.__get_user(request.data['email'])
+
+        # Store the new form.
+        form = self.__create_form(user, request.data['name'],
+                                  request.data['description'])
+
+        # If an error response was returned, pass that along to the client.
+        if isinstance(form, response.Response):
+            return form
+
+        # Create a basic input field for the form.
+        input = self.__create_input(form, "Message", "Add a message to send" \
+                                    " to the form's owner.")
+
+        # If an error response was returned, pass that along to the client.
+        if isinstance(input, response.Response):
+            return input
+
+        # Create a link to the form.
+        link = self.__create_link(form)
+
+        # If an error response was returned, pass that along to the client.
+        if isinstance(link, response.Response):
+            return link
 
         # Send a confirmation email.
         FormConfirmationMail().send(user, form)
@@ -177,6 +223,39 @@ class FormLinkView(generics.RetrieveAPIView):
     # Everyone can view form links.
     permission_classes = [permissions.AllowAny]
 
+    def __confirm_form(self, formLink):
+        """
+        Private method to confirm the form if possible.
+        """
+
+        # Confirm the form if it has not yet been confirmed.
+        if formLink.form.confirmed is None:
+
+            # Update the form.
+            formSerializer = FormSerializer(
+                formLink.form,
+                data={'confirmed': timezone.now()},
+                partial=True
+            )
+
+            # Save the form update if possible.
+            if formSerializer.is_valid():
+                formSerializer.save()
+
+        # Verify the user if the user has not yet been verified.
+        if formLink.form.user.verified is None:
+
+            # Update the form's user.
+            userSerializer = UserSerializer(
+                formLink.form.user,
+                data={'verified': timezone.now()},
+                partial=True
+            )
+
+            # Save the user update if possible.
+            if userSerializer.is_valid():
+                userSerializer.save()
+
     def get(self, request, key, format=None):
         """
         Get the details from a form link.
@@ -187,42 +266,15 @@ class FormLinkView(generics.RetrieveAPIView):
 
         # Check if the link has expired.
         if (formLink.expires < timezone.now()):
-           return response.Response('expired')
+            return response.Response('expired')
 
-        # Check if there's anything we should verify.
+        # Try to confirm the form if we should.
         if (formLink.confirmation):
-
-            # Confirm the form if it has not yet been confirmed.
-            if formLink.form.confirmed is None:
-
-                # Update the form.
-                formSerializer = FormSerializer(
-                    formLink.form,
-                    data={'confirmed': timezone.now()},
-                    partial=True
-                )
-
-                # Save the form update if possible.
-                if formSerializer.is_valid():
-                    formSerializer.save()
-
-            # Verify the user if the user has not yet been verified.
-            if formLink.form.user.verified is None:
-
-                # Update the form's user.
-                userSerializer = UserSerializer(
-                    formLink.form.user,
-                    data={'verified': timezone.now()},
-                    partial=True
-                )
-
-                # Save the user update if possible.
-                if userSerializer.is_valid():
-                    userSerializer.save()
+            self.__confirm_form(formLink)
 
         # If the form has not been confirmed, we should not show it.
         if (not formLink.form.confirmed):
-          return response.Response(False)
+            return response.Response(False)
 
         # Construct the response object.
         result = {
