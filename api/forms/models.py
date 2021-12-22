@@ -1,6 +1,6 @@
 import secrets
 import os
-from django.db import models
+from djongo import models
 from django.utils import timezone
 from datetime import timedelta
 
@@ -9,11 +9,21 @@ class TimeStamped(models.Model):
     """
     Abstract base class to add time stamps to models.
     """
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
+        """
+        Extra settings for the TimeStamped class.
+        """
+
+        # Indicate that this is an abstract class that is to be used for
+        # inheritance only. It should never exist on its own.
         abstract = True
+
+    # Make sure we always have a timestamp for when this object was created.
+    created = models.DateTimeField(auto_now_add=True)
+
+    # Add a timestamp for when the object was last modified.
+    updated = models.DateTimeField(auto_now=True)
 
 
 # Create your models here.
@@ -21,13 +31,6 @@ class User(TimeStamped):
     """
     This model represents a single user.
     """
-
-    # Users are identified by their email address.
-    email = models.CharField(max_length=320, unique=True, primary_key=True)
-
-    # Flag to record when (if ever) ownership of the email address was
-    # verified.
-    verified = models.DateTimeField(null=True)
 
     def __str__(self):
         """
@@ -37,28 +40,18 @@ class User(TimeStamped):
         # We can use the email address. It should be unique.
         return self.email
 
+    # Users are identified by their email address.
+    email = models.CharField(max_length=320, unique=True, primary_key=True)
+
+    # Flag to record when (if ever) ownership of the email address was
+    # verified.
+    verified = models.DateTimeField(null=True)
+
 
 class Form(TimeStamped):
     """
     This model represents a single form.
     """
-
-    # Add an automatic primary key.
-    id = models.AutoField(primary_key=True)
-
-    # A form is always tied to a user.
-    user = models.ForeignKey(User, related_name='forms',
-                             on_delete=models.CASCADE)
-
-    # A form is identified by a name, which is unique per user.
-    name = models.CharField(max_length=256, default='Form')
-
-    # Every form can have an optional description they can use to make a note
-    # about the form to themselves.
-    description = models.CharField(max_length=1024, blank=True, null=True)
-
-    # Flag to record when (if ever) this form was confirmed by the user.
-    confirmed = models.DateTimeField(null=True)
 
     class Meta:
         """
@@ -76,6 +69,20 @@ class Form(TimeStamped):
         # We can combine the form's name and the user, as this should be a
         # unique combination.
         return self.name + ':' + str(self.user)
+
+    # A form is always tied to a user.
+    user = models.ForeignKey(User, related_name='forms',
+                             on_delete=models.CASCADE)
+
+    # A form is identified by a name, which is unique per user.
+    name = models.CharField(max_length=256, default='Form')
+
+    # Every form can have an optional description they can use to make a note
+    # about the form to themselves.
+    description = models.CharField(max_length=1024, blank=True, null=True)
+
+    # Flag to record when (if ever) this form was confirmed by the user.
+    confirmed = models.DateTimeField(null=True)
 
 
 class Link(TimeStamped):
@@ -103,23 +110,6 @@ class Link(TimeStamped):
             if (not Link.objects.filter(key=key).exists()):
                 return key
 
-    # A link is identified by this key. Every link should be unique, regardless
-    # of the form it is attached to. It should have a reasonable length to fit
-    # a URL.
-    key = models.CharField(max_length=128, primary_key=True,
-                           default=generate_key)
-
-    def default_expire_date():
-      """
-      Method to calculate the default expire date.
-      """
-
-      # By default, links should last about half a year.
-      return timezone.now() + timedelta(180)
-
-    # Always set an expire date on links. We shouldn't keep these forever.
-    expires = models.DateTimeField(default=default_expire_date)
-
     def __str__(self):
         """
         Converts a link to a string representation.
@@ -127,6 +117,11 @@ class Link(TimeStamped):
 
         # The key should be unique, and is already a string.
         return self.key
+
+    # A link is identified by this key. Every link should be unique, regardless
+    # of the form it is attached to. It should have a reasonable length to fit
+    # a URL.
+    key = models.CharField(max_length=128, unique=True, default=generate_key)
 
 
 class FormLink(Link):
@@ -143,20 +138,22 @@ class FormLink(Link):
     both the form and the user will be verified and activated.
     """
 
-    # A link is always tied to a single form.
-    form = models.ForeignKey(Form, related_name='links',
-                             on_delete=models.CASCADE)
-
-    # Should this link be used to confirm the associated form and user?
-    confirmation = models.BooleanField(default=False)
-
     def url(self):
         """
-        Method to generate a URL for this link.
+        Method to generate a URL using this link's key to link to the form it is
+        associated with.
         """
 
         # Construct a URL with the key for this link.
         return f"{os.getenv('CLIENT_URL')}form/{self.key}"
+
+    def default_expire_date():
+      """
+      Method to calculate the default expiration date.
+      """
+
+      # By default, links should last about half a year.
+      return timezone.now() + timedelta(180)
 
     def __str__(self):
         """
@@ -167,21 +164,63 @@ class FormLink(Link):
         # convenience, we also add the form it links to.
         return super().__str__() + ':' + str(self.form)
 
+    # Always set an expire date on form links. We shouldn't keep these forever.
+    expires = models.DateTimeField(default=default_expire_date)
+
+    # A link is always tied to a single form.
+    form = models.ForeignKey(Form, related_name='links',
+                             on_delete=models.CASCADE)
+
+    # Should this link be used to confirm the associated form and user?
+    confirmation = models.BooleanField(default=False)
+
+
+class LoginLink(Link):
+    """
+    This is link that users can click to authenticate. This is a link that gets
+    sent to an email address. The user can click this link to authenticate and
+    get access to user specific parts of the application.
+    """
+
+    def default_expire_date():
+      """
+      Overriding the default expiration date to calculate a much shorter
+      expiration date for the login link.
+      """
+
+      # By default, login links should expire in half an hour.
+      return timezone.now() + timedelta(1//48)
+
+    def url(self):
+        """
+        Method to generate a URL for the page that a user can visit to
+        authenticate.
+        """
+
+        # Construct a URL with the key for this link.
+        return f"{os.getenv('CLIENT_URL')}authenticated/{self.key}"
+
+    def __str__(self):
+        """
+        Converts a login link to a string representation.
+        """
+
+        # We can combine the link's key, which should be unique. For
+        # convenience, we also add the user it links to.
+        return super().__str__() + ':' + str(self.user)
+
+    # Set an altered expiration date for the login link as these should not
+    # keep too long.
+    expires = models.DateTimeField(default=default_expire_date)
+
+    # A login link is always tied to a user.
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
 
 class Input(TimeStamped):
     """
     This model represents a user.
     """
-
-    # An input is always tied to a single form.
-    form = models.ForeignKey(Form, related_name='inputs',
-                             on_delete=models.CASCADE)
-
-    # An input is identified by a name that is unique for each form.
-    name = models.CharField(max_length=256)
-
-    # Optionally, we can define a tooltip attribute.
-    title = models.CharField(max_length=512, blank=True, null=True)
 
     class Meta:
         """
@@ -199,3 +238,13 @@ class Input(TimeStamped):
         # We can combine the input's name and the form, as this should be a
         # unique combination.
         return self.name + ':' + str(self.form)
+
+    # An input is always tied to a single form.
+    form = models.ForeignKey(Form, related_name='inputs',
+                             on_delete=models.CASCADE)
+
+    # An input is identified by a name that is unique for each form.
+    name = models.CharField(max_length=256)
+
+    # Optionally, we can define a tooltip attribute.
+    title = models.CharField(max_length=512, blank=True, null=True)

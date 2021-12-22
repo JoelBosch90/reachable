@@ -9,3 +9,6 @@
 
 ## Run the server
 `python manage.py runserver`
+
+# Create an admin user
+`python manage.py createsuperuser`

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import TimeStamped, User, Form, Link, FormLink, Input
+from .models import User, Form, Link, LoginLink, FormLink, Input
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -64,7 +64,24 @@ class FormSerializer(serializers.ModelSerializer):
         }
 
 
-class FormLinkSerializer(serializers.ModelSerializer):
+class LinkSerializer(serializers.ModelSerializer):
+    """
+    This serializer knows how to construct a Link object.
+    """
+
+    class Meta:
+        """
+        Specification of how the Link model is serialized.
+        """
+
+        model = Link
+        fields = [
+            "id",
+            "key",
+        ]
+
+
+class FormLinkSerializer(LinkSerializer):
     """
     This serializer knows how to construct a FormLink object.
     """
@@ -76,11 +93,29 @@ class FormLinkSerializer(serializers.ModelSerializer):
 
         model = FormLink
         fields = [
-            "form",
+            "id",
             "key",
+            "form",
             "confirmation",
         ]
 
+
+class LoginLinkSerializer(LinkSerializer):
+    """
+    This serializer knows how to construct a LoginLink object.
+    """
+
+    class Meta:
+        """
+        Specification of how the LoginLink model is serialized.
+        """
+
+        model = LoginLink
+        fields = [
+            "id",
+            "key",
+            "user",
+        ]
 
 class InputSerializer(serializers.ModelSerializer):
     """
@@ -94,6 +129,7 @@ class InputSerializer(serializers.ModelSerializer):
 
         model = Input
         fields = [
+            "id",
             "form",
             "name",
             "title",

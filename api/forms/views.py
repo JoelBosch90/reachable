@@ -6,13 +6,14 @@ from rest_framework import (
   generics, permissions, response
 )
 from tools.Mail import (
-  FormConfirmationMail, FormResponseMail
+  FormConfirmationMail, FormResponseMail, LoginLinkMail
 )
 from .models import (
   User, Form, FormLink, Input
 )
 from .serializers import (
-  UserSerializer, FormSerializer, FormLinkSerializer, InputSerializer
+  UserSerializer, FormSerializer, LoginLinkSerializer, FormLinkSerializer,
+  InputSerializer
 )
 
 
@@ -115,6 +116,8 @@ class FormListView(generics.CreateAPIView):
         if isinstance(form, response.Response):
             return form
 
+        print("Made the form!")
+
         # Create a basic input field for the form.
         input = self.__create_input(form, "Message", "Add a message to send" \
                                     " to the form's owner.")
@@ -122,6 +125,8 @@ class FormListView(generics.CreateAPIView):
         # If an error response was returned, pass that along to the client.
         if isinstance(input, response.Response):
             return input
+
+        print("Made the input!")
 
         # Create a link to the form.
         link = self.__create_link(form)
@@ -214,10 +219,10 @@ class FormLinkView(generics.RetrieveAPIView):
     This is the endpoint that allows for retrieving individual form links.
     """
 
-    # We're using the Link objects.
+    # We're using the FormLink objects.
     queryset = FormLink.objects.all()
 
-    # We're using the Link serializer.
+    # We're using the FormLink serializer.
     serializer_class = FormLinkSerializer
 
     # Everyone can view form links.
@@ -330,3 +335,65 @@ class InputDetailView(generics.RetrieveUpdateDestroyAPIView):
     # Everyone can view inputs, but only the user that owns them can modify
     # them.
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+class LoginRequest(generics.CreateAPIView):
+    """
+    This is the endpoint that allows for requesting a login link. This is a link
+    that gets sent to an email address. The user can click this link to
+    authenticate and get access to user specific parts of the application.
+    """
+
+    # Anyone can request a login link.
+    permission_classes = [permissions.AllowAny]
+
+    def __create_link(self, user):
+        """
+        Private method to create a link.
+        """
+
+        # Create a new link for this form.
+        loginLinkSerializer = LoginLinkSerializer(data={
+            'user': user.email
+        })
+
+        # If we cannot create a link, let the client know.
+        if not loginLinkSerializer.is_valid():
+            return response.Response(loginLinkSerializer.errors)
+
+        # Otherwise, store and return the link.
+        return loginLinkSerializer.save()
+
+    def post(self, request, format=None):
+        """
+        Try to create a login link and send a login request.
+        """
+
+        # Create a serializer for the user.
+        userSerializer = UserSerializer(data={
+            'email': request.data['email']
+        })
+
+        # If the serializer is valid, that means that a user with this email
+        # address does not yet exist. In this case, we won't send a link, but
+        # we'll act like we did as we don't want to give away if the user exists
+        # or not.
+        if userSerializer.is_valid():
+            return response.Response(True)
+
+        # We should be able to find the user if it already exists.
+        user = User.objects.get(email=request.data['email'])
+
+        # Try to create a link.
+        link = self.__create_link(user)
+
+        # If something when wrong with creating the link, we should forward the
+        # error response.
+        if isinstance(link, response.Response):
+            return link
+
+        # Send a login link mail to the user.
+        LoginLinkMail().send(user, link)
+
+        # Send back a success message.
+        return response.Response(True)

@@ -105,3 +105,54 @@ class FormResponseMail:
             # We do want to know when sending fails.
             fail_silently=False,
         )
+
+
+class LoginLinkMail:
+    """
+    Helper class to send a single email containg a login link that the user can
+    click to authenticate and get access to user specific data.
+    """
+
+    def send(self, user, link):
+        """
+        Method to send the login link email.
+        """
+
+        # Add an introduction the email.
+        message = "Hey there, form builder!\n\n"
+
+        # Add an explanation about the email.
+        message += "\n\nWe've generated a brand new login link for you. You" \
+                   " can simply click this link to login."
+
+        # Add a warning about the short expiration time.
+        message += "\n\nBe sure to click quickly as this link will expire" \
+                   " within half an hour!"
+
+        # Add the link.
+        message += f"\n\n{link.url()}"
+
+        # Add a remark for if the user did not request the link.
+        message += "\n\nDid you not request this link? Then you can safely" \
+                   " ignore this email."
+
+        # Add a closing greeting to the mail.
+        message += "\n\nGreetings,\nYour friends @ Reachable"
+
+        send_mail(
+
+            # Add a subject.
+            subject=f"Your login link has arrived!",
+
+            # Add our message.
+            message=message,
+
+            # Send a single email to the user.
+            recipient_list=[user.email],
+
+            # We can use the default FROM address.
+            from_email=None,
+
+            # We do want to know when sending fails.
+            fail_silently=False,
+        )

@@ -11,4 +11,5 @@ urlpatterns = [
     path("links/<key>", views.FormLinkDetailView.as_view()),
     path("inputs/", views.InputListView.as_view()),
     path("inputs/<int:pk>", views.InputDetailView.as_view()),
+    path("login/", views.LoginRequest.as_view()),
 ]

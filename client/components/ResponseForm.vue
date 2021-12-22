@@ -6,12 +6,7 @@
       </h1>
     </v-card-title>
     <v-card-text
-      v-if="error"
-    >
-      {{ error }}
-    </v-card-text>
-    <v-card-text
-      v-else-if="!responded"
+      v-if="!responded"
     >
       <p>
         {{ form.description }}
@@ -54,8 +49,7 @@ export default {
       },
       // This is the input that the user has added to the form.
       response: {},
-      responded: false,
-      error: ''
+      responded: false
     }
   },
   mounted () {
