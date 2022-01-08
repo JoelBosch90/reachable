@@ -33,8 +33,8 @@ export default {
   },
   methods: {
     copyLink () {
-      // Copy the current link to the clipboard so that the user can immediately
-      // paste it elsewhere.
+      // Copy the current link to the clipboard so that the user can
+      // immediately paste it elsewhere.
       navigator.clipboard.writeText(this.link)
     }
   }

@@ -2,6 +2,7 @@
 import json
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect, Http404
 from rest_framework import (
   generics, permissions, response
 )
@@ -9,7 +10,7 @@ from tools.Mail import (
   FormConfirmationMail, FormResponseMail
 )
 from .models import (
-  User, Form, FormLink, Input
+  User, Form, FormLink, FormConfirmationLink, Input
 )
 from .serializers import (
   UserSerializer, FormSerializer, FormLinkSerializer, InputSerializer
@@ -52,8 +53,7 @@ class FormListView(generics.CreateAPIView):
         })
 
         # If it is not a valid form request, let the client know.
-        if not formSerializer.is_valid():
-            return response.Response(formSerializer.errors)
+        formSerializer.is_valid(raise_exception=True)
 
         # Store the new form.
         form = formSerializer.save()
@@ -66,8 +66,7 @@ class FormListView(generics.CreateAPIView):
         })
 
         # If it is not a input form request, let the client know.
-        if not inputSerializer.is_valid():
-            return response.Response(inputSerializer.errors)
+        inputSerializer.is_valid(raise_exception=True)
 
         # Otherwise, store it.
         inputSerializer.save()
@@ -78,14 +77,13 @@ class FormListView(generics.CreateAPIView):
         })
 
         # If we cannot create a link, let the client know.
-        if not formLinkSerializer.is_valid():
-            return response.Response(formLinkSerializer.errors)
+        formLinkSerializer.is_valid(raise_exception=True)
 
         # Otherwise, store the link.
         link = formLinkSerializer.save()
 
         # Send a confirmation email.
-        FormConfirmationMail().send(user, form)
+        FormConfirmationMail().send(user, form, link)
 
         # Send the link back to the client.
         return response.Response(link.key)
@@ -112,6 +110,34 @@ class FormResponseView(generics.CreateAPIView):
 
         # Send back a success message.
         return response.Response(True)
+
+
+class FormConfirmationView(generics.RetrieveAPIView):
+    """
+    This is the endpoint that confirms if a form can be activated.
+    """
+
+    # A user does not have to be authenticated to confirm a form. The link
+    # itself acts as a unique identifier as we only send this link to the
+    # form's owner's email address.
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, key, format=None):
+        """
+        Try to confirm the form, then link to the associated form link's share
+        page.
+        """
+
+        # Get the confirmation link.
+        confirmationLink = get_object_or_404(FormConfirmationLink, key=key)
+
+        # Simply raise a 404 if the link has already expired. This is not
+        # great UX, but will do for now.
+        if confirmationLink.hasExpired():
+            raise Http404
+
+        # Redirect the user to the form link's share page.
+        return HttpResponseRedirect(redirect_to=confirmationLink.formLink.shareUrl())
 
 
 class FormDetailView(generics.RetrieveUpdateDestroyAPIView):

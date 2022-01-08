@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import TimeStamped, User, Form, Link, FormLink, Input
+from .models import (
+  TimeStamped, User, Form, FormConfirmationLink, Link, FormLink, Input
+)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -78,7 +80,23 @@ class FormLinkSerializer(serializers.ModelSerializer):
         fields = [
             "form",
             "key",
-            "confirmation",
+        ]
+
+
+class FormConfirmationLinkSerializer(serializers.ModelSerializer):
+    """
+    This serializer knows how to construct a FormConfirmationLink object.
+    """
+
+    class Meta:
+        """
+        Specification of how the FormConfirmationLink model is serialized.
+        """
+
+        model = FormConfirmationLink
+        fields = [
+            "formLink",
+            "key",
         ]
 
 

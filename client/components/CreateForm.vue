@@ -58,17 +58,23 @@ export default {
         description: {
           label: 'Description',
           rules: [],
-          hint: 'This description will be shown near your form. You can use this to explain the form\'s purpose or ask questions to your respondents.',
+          hint: 'This description will be shown near your form. You can use' +
+                ' this to explain the form\'s purpose or ask questions to' +
+                ' your respondents.',
           required: false
         },
         email: {
           label: 'Email address',
           rules: [
-            value => !!value || 'Please supply an email address to which we can send this form\'s responses.',
-            // Use a simple regex to check for the presence of an @-symbol and a dot in the domain name.
-            value => /.+@.+\..+/.test(value) || 'Please supply a valid email address.'
+            value => !!value || 'Please supply an email address to which we' +
+                                ' can send this form\'s responses.',
+            // Use a simple regex to check for the presence of an @-symbol and
+            // a dot in the domain name.
+            value => /.+@.+\..+/.test(value) || 'Please supply a valid email' +
+                                                ' address.'
           ],
-          hint: 'Any responses to this form will be sent to this email address.',
+          hint: 'Any responses to this form will be sent to this email' +
+                ' address.',
           required: true
         }
       }
@@ -79,18 +85,30 @@ export default {
     // submitted in the form.
     async createLink () {
       // Create the form, and get the key.
-      const response = await this.$axios.post('forms/', this.form)
+      const response = await this.$axios.post('forms/', this.form).catch((error) => {
+        // Check if we have error response data.
+        const data = error.response.data
+
+        // Check if we're dealing if an error that is not field specific.
+        if (data.non_field_errors) {
+          return this.$refs.form.showError(data.non_field_errors)
+
+        // Otherwise, we have to give a generic error.
+        } else {
+          return this.$refs.form.showError('Error occurred: your form could' +
+                                           ' not be created.')
+        }
+      })
 
       // Make sure we have data, then redirect the user to the new form.
       if (response && response.data) {
         this.$router.push({
-          name: 'form-created-key',
+          name: 'form-share-key',
           params: {
             key: response.data
           }
         })
-      // Otherwise, something has gone wrong and we should tell the user.
-      } else { this.$refs.form.showError('Error occurred: your form could not be created.') }
+      }
     }
   }
 }

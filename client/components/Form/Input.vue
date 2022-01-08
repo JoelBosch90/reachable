@@ -22,7 +22,8 @@ export default {
       type: String,
       default: ''
     },
-    // Should the user be able to submit the form without completing this field?
+    // Should the user be able to submit the form without completing this
+    // field?
     required: {
       type: Boolean,
       default: true

@@ -7,6 +7,7 @@ urlpatterns = [
     path("forms/response/", views.FormResponseView.as_view()),
     path("forms/<int:pk>", views.FormDetailView.as_view()),
     path("forms/link/<key>", views.FormLinkView.as_view()),
+    path("forms/confirm/<key>", views.FormConfirmationView.as_view()),
     path("links/", views.FormLinkListView.as_view()),
     path("links/<key>", views.FormLinkDetailView.as_view()),
     path("inputs/", views.InputListView.as_view()),

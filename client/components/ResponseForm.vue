@@ -67,7 +67,8 @@ export default {
     async load () {
       try {
         // Get the information about the form.
-        const response = await this.$axios.get('forms/link/' + this.$route.params.key)
+        const response = await this.$axios.get('forms/link/' +
+                                               this.$route.params.key)
 
         // If we cannot get the form, we should throw an error.
         if (!response || !response.data) {
@@ -112,10 +113,11 @@ export default {
       if (response && response.data) {
         this.responded = true
 
-      // If we didn't get a valid response, something went wrong server-side. We
-      // should tell the user that something has gone wrong.
+      // If we didn't get a valid response, something went wrong server-side.
+      // We should tell the user that something has gone wrong.
       } else {
-        this.$refs.form.showError('Error occurred: your response could not be sent.')
+        this.$refs.form.showError('Error occurred: your response could not' +
+                                  ' be sent.')
       }
     }
   }

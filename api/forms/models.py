@@ -85,7 +85,7 @@ class Link(TimeStamped):
     extending class to link to something useful.
     """
 
-    def generate_key():
+    def generate_key(self):
         """
         Method to generate a unique key for this link.
         """
@@ -109,16 +109,25 @@ class Link(TimeStamped):
     key = models.CharField(max_length=128, primary_key=True,
                            default=generate_key)
 
-    def default_expire_date():
-      """
-      Method to calculate the default expire date.
-      """
+    def default_expire_date(self):
+        """
+        Method to calculate the default expire date.
+        """
 
-      # By default, links should last about half a year.
-      return timezone.now() + timedelta(180)
+        # By default, links should last about half a year.
+        return timezone.now() + timedelta(180)
 
     # Always set an expire date on links. We shouldn't keep these forever.
     expires = models.DateTimeField(default=default_expire_date)
+
+    def hasExpired(self):
+        """
+        Method to check if this link has already expired.
+        """
+
+        # If now is greater than or equal to the expiration date, this link is
+        # still good.
+        return self.expires < timezone.now()
 
     def __str__(self):
         """
@@ -132,31 +141,29 @@ class Link(TimeStamped):
 class FormLink(Link):
     """
     This model represents a link to a form. This type of link is always tied to
-    a single form, and is used to access that form. A single form can have
+    a single form, and is used to access that form. A single form could have
     multiple links to allow users to identify different types of traffic.
-
-    Optionally, this link can be used to confirm the form and the user. Because
-    anyone can create a form for any email address, we should first make sure
-    that the owner of the email address wants to receive the form's responses.
-    We can do that by sending a unique form link with the confirmation flag set
-    to True to their email address. As soon as the receiver clicks this link,
-    both the form and the user will be verified and activated.
     """
 
     # A link is always tied to a single form.
     form = models.ForeignKey(Form, related_name='links',
                              on_delete=models.CASCADE)
 
-    # Should this link be used to confirm the associated form and user?
-    confirmation = models.BooleanField(default=False)
-
     def url(self):
         """
         Method to generate a URL for this link.
         """
 
-        # Construct a URL with the key for this link.
+        # Link to the form.
         return f"{os.getenv('CLIENT_URL')}form/{self.key}"
+
+    def shareUrl(self):
+        """
+        Method to generate a URL for this link.
+        """
+
+        # Link to the form's share page.
+        return f"{os.getenv('CLIENT_URL')}form/share/{self.key}"
 
     def __str__(self):
         """
@@ -166,6 +173,39 @@ class FormLink(Link):
         # We can combine the link's key, which should be unique. For
         # convenience, we also add the form it links to.
         return super().__str__() + ':' + str(self.form)
+
+
+class FormConfirmationLink(Link):
+    """
+    This link can be used to confirm a form. Because anyone can create a form
+    for any email address, we should first make sure that the owner of the
+    email address wants to receive the form's responses. We can do that by
+    sending a unique form link to their email address. As soon as the receiver
+    clicks this link, the form will be verified and activated.
+
+    If this is a user's first form, the user will also be verified.
+    """
+
+    # A FormConfirmationLink is always linked to a specific form link that it
+    # will redirect to if successful.
+    formLink = models.ForeignKey(FormLink, on_delete=models.CASCADE)
+
+    def url(self):
+        """
+        Method to generate a URL for the confirmation link.
+        """
+
+        # Create the link that will confirm the link to confirm the form.
+        return f"{os.getenv('API_URL')}forms/confirm/{self.key}"
+
+    def __str__(self):
+        """
+        Converts a confirmation link to a string representation.
+        """
+
+        # We can combine the link's key, which should be unique. For
+        # convenience, we also add the form it links to.
+        return super().__str__() + ':' + str(self.formLink.form)
 
 
 class Input(TimeStamped):

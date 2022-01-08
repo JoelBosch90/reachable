@@ -51,7 +51,20 @@ export default {
     // Parent components can call this method to show an error message on the
     // form.
     showError (message) {
-      this.error = message || 'An unknown error has occurred.'
+      // Are we given multiple errors to display? Display each one on a new
+      // line.
+      if (Array.isArray(message)) {
+        this.error = message.join('\n')
+
+      // Are we given a single error message?
+      } else if (typeof message === 'string') {
+        this.error = message
+
+      // If we aren't given anything specific, we can display a generic error
+      // message.
+      } else {
+        this.error = 'An unknown error has occurred.'
+      }
     }
   }
 }

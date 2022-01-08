@@ -1,18 +1,8 @@
 # Import dependenices.
 from django.core.mail import send_mail
-from forms.models import (
-  User, Form, FormLink
-)
 from forms.serializers import (
-  FormLinkSerializer
+  FormConfirmationLinkSerializer
 )
-
-
-class MailException(Exception):
-    """
-    Exception class for mail related errors.
-    """
-    pass
 
 
 class FormConfirmationMail:
@@ -24,23 +14,21 @@ class FormConfirmationMail:
     sending unwanted emails.
     """
 
-    def send(self, user, form):
+    def send(self, user, form, link):
         """
         Method to send the confirmation email.
         """
 
         # Create a new confirmation link for this form.
-        formLinkSerializer = FormLinkSerializer(data={
-            'form': form.id,
-            'confirmation': True,
+        confirmationLinkSerializer = FormConfirmationLinkSerializer(data={
+            'formLink': link.key,
         })
 
         # Check if this link is valid.
-        if not formLinkSerializer.is_valid():
-            raise MailException('Could not generate confirmation link.')
+        confirmationLinkSerializer.is_valid(raise_exception=True)
 
         # Save the serializer to get the confirmation link.
-        confirmationLink = formLinkSerializer.save().url()
+        confirmationLink = confirmationLinkSerializer.save().url()
 
         message = "Congratulations on creating your new form!\n\nClick" \
                   " here to start accepting new submissions for the" \
