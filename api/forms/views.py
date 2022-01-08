@@ -1,5 +1,6 @@
 # Import dependencies.
 import json
+import os
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, Http404
@@ -10,7 +11,7 @@ from tools.Mail import (
   FormConfirmationMail, FormResponseMail
 )
 from .models import (
-  User, Form, FormLink, FormConfirmationLink, Input
+  User, Form, FormLink, FormConfirmationLink, FormDisableLink, Input
 )
 from .serializers import (
   UserSerializer, FormSerializer, FormLinkSerializer, InputSerializer
@@ -83,7 +84,7 @@ class FormListView(generics.CreateAPIView):
         link = formLinkSerializer.save()
 
         # Send a confirmation email.
-        FormConfirmationMail().send(user, form, link)
+        FormConfirmationMail().send(user, link)
 
         # Send the link back to the client.
         return response.Response(link.key)
@@ -103,10 +104,15 @@ class FormResponseView(generics.CreateAPIView):
         """
 
         # Get the form.
-        form = get_object_or_404(Form, id=request.data['form'])
+        formLink = get_object_or_404(FormLink, key=request.data['link'])
+
+        # Check if the owner has disabled the form. We should no longer be
+        # sending responses.
+        if formLink.form.disabled:
+            return response.Response(False)
 
         # Send the response to the owner of the form.
-        FormResponseMail().send(form.user, form, request.data['inputs'])
+        FormResponseMail().send(formLink, request.data['inputs'])
 
         # Send back a success message.
         return response.Response(True)
@@ -131,10 +137,9 @@ class FormConfirmationView(generics.RetrieveAPIView):
         # Get the confirmation link.
         confirmationLink = get_object_or_404(FormConfirmationLink, key=key)
 
-        # Simply raise a 404 if the link has already expired. This is not
-        # great UX, but will do for now.
+        # Explain to the user that this link has expired.
         if confirmationLink.hasExpired():
-            raise Http404
+            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/form/expired")
 
         # Get access to the form object.
         form = confirmationLink.formLink.form
@@ -169,6 +174,40 @@ class FormConfirmationView(generics.RetrieveAPIView):
 
         # Redirect the user to the form link's share page.
         return HttpResponseRedirect(redirect_to=confirmationLink.formLink.shareUrl())
+
+
+class FormDisableView(generics.RetrieveAPIView):
+    """
+    This is the endpoint that disables a form.
+    """
+
+    # A user does not have to be authenticated to disable a form. The link
+    # itself acts as a unique identifier as we only send this link to the
+    # form's owner's email address.
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, key, format=None):
+        """
+        Disable the form, then redirect to a proper
+        """
+
+        # Get the disable link.
+        disableLink = get_object_or_404(FormDisableLink, key=key)
+
+        # Update the form.
+        formSerializer = FormSerializer(
+            disableLink.formLink.form,
+            data={'disabled': True},
+            partial=True
+        )
+
+        # Save the form update if possible.
+        if formSerializer.is_valid(raise_exception=True):
+            formSerializer.save()
+
+        # Redirect the user to the form link's page that should now state that
+        # it has been disabled.
+        return HttpResponseRedirect(redirect_to=disableLink.formLink.url())
 
 
 class FormDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -243,12 +282,16 @@ class FormLinkView(generics.RetrieveAPIView):
         formLink = get_object_or_404(FormLink, key=key)
 
         # Check if the link has expired.
-        if (formLink.expires < timezone.now()):
-           return response.Response('expired')
+        if formLink.hasExpired():
+            return response.Response('expired')
 
         # If the form has not been confirmed, we should not show it.
         if (not formLink.form.confirmed):
-          return response.Response(False)
+            return response.Response('unconfirmed')
+
+        # If the form has been disabled, we should not show it.
+        if (formLink.form.disabled):
+            return response.Response('disabled')
 
         # Construct the response object.
         result = {

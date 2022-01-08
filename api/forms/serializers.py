@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import (
-  TimeStamped, User, Form, FormConfirmationLink, Link, FormLink, Input
+  TimeStamped, User, Form, Link, FormLink, FormConfirmationLink,
+  FormDisableLink, Input
 )
 
 
@@ -60,6 +61,7 @@ class FormSerializer(serializers.ModelSerializer):
             "inputs",
             "links",
             "confirmed",
+            "disabled"
         ]
         extra_kwargs = {
             "description": {"required": False},
@@ -94,6 +96,23 @@ class FormConfirmationLinkSerializer(serializers.ModelSerializer):
         """
 
         model = FormConfirmationLink
+        fields = [
+            "formLink",
+            "key",
+        ]
+
+
+class FormDisableLinkSerializer(serializers.ModelSerializer):
+    """
+    This serializer knows how to construct a FormDisableLink object.
+    """
+
+    class Meta:
+        """
+        Specification of how the FormDisableLink model is serialized.
+        """
+
+        model = FormDisableLink
         fields = [
             "formLink",
             "key",

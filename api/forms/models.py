@@ -60,6 +60,9 @@ class Form(TimeStamped):
     # Flag to record when (if ever) this form was confirmed by the user.
     confirmed = models.DateTimeField(null=True)
 
+    # Flag to record if this form is disabled by the owner.
+    disabled = models.BooleanField(default=False)
+
     class Meta:
         """
         Extra settings for the Form class.
@@ -85,9 +88,9 @@ class Link(TimeStamped):
     extending class to link to something useful.
     """
 
-    def generate_key(self):
+    def generate_key():
         """
-        Method to generate a unique key for this link.
+        Function to generate a unique key for this link.
         """
 
         # While unlikely, it is possible that the first key we create is not
@@ -109,9 +112,9 @@ class Link(TimeStamped):
     key = models.CharField(max_length=128, primary_key=True,
                            default=generate_key)
 
-    def default_expire_date(self):
+    def default_expire_date():
         """
-        Method to calculate the default expire date.
+        Function to calculate the default expire date.
         """
 
         # By default, links should last about half a year.
@@ -205,6 +208,35 @@ class FormConfirmationLink(Link):
 
         # We can combine the link's key, which should be unique. For
         # convenience, we also add the form it links to.
+        return super().__str__() + ':' + str(self.formLink.form)
+
+
+class FormDisableLink(Link):
+    """
+    No matter the reason, we should always provide the owner of the inbox with
+    the ability to disable a form and prevent further emails from it. We can do
+    this by adding a special link to the confirmation email and each response
+    with which the owner can disable the form.
+    """
+
+    # A FormDisableLink is always linked to a specific FormLink.
+    formLink = models.ForeignKey(FormLink, on_delete=models.CASCADE)
+
+    def url(self):
+        """
+        Method to generate a URL for the disable link.
+        """
+
+        # Create the link that will disable the form.
+        return f"{os.getenv('API_URL')}forms/disable/{self.key}"
+
+    def __str__(self):
+        """
+        Converts a confirmation link to a string representation.
+        """
+
+        # We can combine the link's key, which should be unique. For
+        # convenience, we also add the form it disables.
         return super().__str__() + ':' + str(self.formLink.form)
 
 
