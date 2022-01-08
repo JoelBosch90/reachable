@@ -136,6 +136,37 @@ class FormConfirmationView(generics.RetrieveAPIView):
         if confirmationLink.hasExpired():
             raise Http404
 
+        # Get access to the form object.
+        form = confirmationLink.formLink.form
+
+        # Confirm the form if it has not yet been confirmed.
+        if form.confirmed is None:
+
+            # Update the form.
+            formSerializer = FormSerializer(
+                form,
+                data={'confirmed': timezone.now()},
+                partial=True
+            )
+
+            # Save the form update if possible.
+            if formSerializer.is_valid():
+                formSerializer.save()
+
+        # Verify the user if the user has not yet been verified.
+        if form.user.verified is None:
+
+            # Update the form's user.
+            userSerializer = UserSerializer(
+                form.user,
+                data={'verified': timezone.now()},
+                partial=True
+            )
+
+            # Save the user update if possible.
+            if userSerializer.is_valid():
+                userSerializer.save()
+
         # Redirect the user to the form link's share page.
         return HttpResponseRedirect(redirect_to=confirmationLink.formLink.shareUrl())
 
@@ -214,37 +245,6 @@ class FormLinkView(generics.RetrieveAPIView):
         # Check if the link has expired.
         if (formLink.expires < timezone.now()):
            return response.Response('expired')
-
-        # Check if there's anything we should verify.
-        if (formLink.confirmation):
-
-            # Confirm the form if it has not yet been confirmed.
-            if formLink.form.confirmed is None:
-
-                # Update the form.
-                formSerializer = FormSerializer(
-                    formLink.form,
-                    data={'confirmed': timezone.now()},
-                    partial=True
-                )
-
-                # Save the form update if possible.
-                if formSerializer.is_valid():
-                    formSerializer.save()
-
-            # Verify the user if the user has not yet been verified.
-            if formLink.form.user.verified is None:
-
-                # Update the form's user.
-                userSerializer = UserSerializer(
-                    formLink.form.user,
-                    data={'verified': timezone.now()},
-                    partial=True
-                )
-
-                # Save the user update if possible.
-                if userSerializer.is_valid():
-                    userSerializer.save()
 
         # If the form has not been confirmed, we should not show it.
         if (not formLink.form.confirmed):
