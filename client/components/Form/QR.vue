@@ -1,28 +1,16 @@
 <template>
-  <v-card>
-    <v-card-title>
-      <h1 class="display-1">
-        QR code
-      </h1>
-    </v-card-title>
-    <v-img
-      content-class="r-center"
-    >
-      <client-only>
-        <vue-qrious
-          ref="qr"
-          :size="size"
-          :value="link"
-          :padding="padding"
-          :level="level"
-          :mime="mime"
-        />
-      </client-only>
-    </v-img>
-    <v-card-text>
-      QR code that links to your form.
-    </v-card-text>
-  </v-card>
+  <v-img content-class="r-center">
+    <client-only>
+      <vue-qrious
+        ref="qr"
+        v-model="value"
+        :size="size"
+        :padding="padding"
+        :level="level"
+        :mime="mime"
+      />
+    </client-only>
+  </v-img>
 </template>
 
 <script>
@@ -39,10 +27,23 @@ export default {
   },
   data () {
     return {
-      size: 215,
+      // Sizing the QR code with the VueQrious library is a little tricky as you
+      // can end up with some odd extra padding. These settings were carefully
+      // chosen to avoid that.
+      size: 420,
       level: 'H',
       padding: 30,
-      mime: 'image/png'
+      mime: 'image/png',
+      value: ''
+    }
+  },
+  watch: {
+    link: {
+      immediate: true,
+      // Make sure we update the link for the QR code image.
+      handler () {
+        this.value = this.link
+      }
     }
   }
 }

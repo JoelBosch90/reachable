@@ -64,14 +64,9 @@ export default {
         }
       })
 
-      // Make sure we have data, then redirect the user to the new form.
+      // Make sure we have data, then throw the key up the event chain.
       if (response && response.data) {
-        this.$router.push({
-          name: 'form-share-key',
-          params: {
-            key: response.data
-          }
-        })
+        this.$emit('created', response.data)
       }
     }
   }

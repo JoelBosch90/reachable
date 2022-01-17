@@ -1,11 +1,11 @@
 <template>
-  <v-container
-    class="my-8"
-  >
-    <ResponseForm />
+  <v-container class="my-8">
+    <ResponseForm :link-key="$route.params.key" />
   </v-container>
 </template>
 
 <script>
-export default {}
+export default {
+  layout: 'user'
+}
 </script>

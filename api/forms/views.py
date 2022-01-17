@@ -1,6 +1,7 @@
 # Import dependencies.
 import json
 import os
+import datetime
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, Http404
@@ -139,7 +140,7 @@ class FormConfirmationView(generics.RetrieveAPIView):
 
         # Explain to the user that this link has expired.
         if confirmationLink.hasExpired():
-            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/form/expired")
+            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/expired")
 
         # Get access to the form object.
         form = confirmationLink.formLink.form
@@ -283,11 +284,7 @@ class FormLinkView(generics.RetrieveAPIView):
 
         # Check if the link has expired.
         if formLink.hasExpired():
-            return response.Response('expired')
-
-        # If the form has not been confirmed, we should not show it.
-        if (not formLink.form.confirmed):
-            return response.Response('unconfirmed')
+            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/expired")
 
         # If the form has been disabled, we should not show it.
         if (formLink.form.disabled):
@@ -304,6 +301,9 @@ class FormLinkView(generics.RetrieveAPIView):
 
             # Add the form's description.
             'description': formLink.form.description,
+
+            # Pass on if the form's been confirmed yet.
+            'confirmed': type(formLink.form.confirmed) is datetime.datetime,
 
             # We need to know all inputs.
             'inputs': [{

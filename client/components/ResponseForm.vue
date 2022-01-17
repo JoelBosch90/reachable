@@ -1,19 +1,25 @@
 <template>
-  <v-card>
-    <v-card-title>
-      <h1 class="display-1">
-        {{ form.name }}
-      </h1>
-    </v-card-title>
-    <v-card-text
+  <v-container class="text">
+    <p
+      v-if="form.id != 0 && !form.confirmed"
+      class="body-1 error--text"
+    >
+      This form cannot register any responses because it has not yet been
+      confirmed by the owner.
+      <br><br>
+      Are you the owner? Click the link in your inbox!
+    </p>
+    <h1 class="display-1">
+      {{ form.name }}
+    </h1>
+    <p
       v-if="error"
+      class="body-1 error--text"
     >
       {{ error }}
-    </v-card-text>
-    <v-card-text
-      v-else-if="!responded"
-    >
-      <p>
+    </p>
+    <div v-else-if="!responded">
+      <p class="body-1">
         {{ form.description }}
       </p>
       <Form
@@ -28,21 +34,29 @@
           :label="input.name"
           :hint="input.title"
           :required="true"
+          type="textarea"
         />
       </Form>
-    </v-card-text>
-    <v-card-text
+    </div>
+    <p
       v-else
+      class="body-1"
     >
       Your response has been sent to the form's owner.
       <br>
       Thank you for responding!
-    </v-card-text>
-  </v-card>
+    </p>
+  </v-container>
 </template>
 
 <script>
 export default {
+  props: {
+    linkKey: {
+      type: String,
+      default: ''
+    }
+  },
   data () {
     return {
       // This is the data that describes the form that should be displayed.
@@ -50,7 +64,8 @@ export default {
         name: '',
         description: '',
         id: 0,
-        inputs: []
+        inputs: [],
+        confirmed: false
       },
       // This is the input that the user has added to the form.
       response: {},
@@ -58,45 +73,54 @@ export default {
       error: ''
     }
   },
+  watch: {
+    linkKey: {
+      immediate: true,
+      // Try to load the
+      handler: 'load'
+    }
+  },
   mounted () {
-    // Immediately load the form.
+    // Immediately load the form if we already have a link key.
     this.load()
   },
   methods: {
     // Method to load the form from from the server.
     async load () {
-      try {
-        // Get the information about the form.
-        const response = await this.$axios.get('forms/link/' +
-                                               this.$route.params.key)
+      // Don't try to load anything without a link key.
+      if (this.linkKey) {
+        try {
+          // Get the information about the form.
+          const response = await this.$axios.get('forms/link/' + this.linkKey)
 
-        // If we cannot get the form, we should throw an error.
-        if (!response || !response.data) {
-          throw new Error('invalid')
+          // If we cannot get the form, we should throw an error.
+          if (!response || !response.data) {
+            throw new Error('invalid')
 
-        // Check if we're dealing with an expired link.
-        } else if (response.data === 'expired') {
-          throw new Error('expired')
+          // Check if we're dealing with an expired link.
+          } else if (response.data === 'expired') {
+            throw new Error('expired')
 
-        // Otherwise, extract the data from the response to populate the form.
-        } else { this.form = JSON.parse(response.data) }
+          // Otherwise, extract the data from the response to populate the form.
+          } else { this.form = JSON.parse(response.data) }
 
-      // If we cannot load the form, we should just go tell the user that we
-      // cannot find the form.
-      } catch (error) {
-        // Redirect to 404 in case of an invalid error.
-        if (error.message === 'invalid') {
-          this.$nuxt.error({
-            statusCode: 404,
-            message: 'This form could not be found.'
-          })
+        // If we cannot load the form, we should just go tell the user that we
+        // cannot find the form.
+        } catch (error) {
+          // Redirect to 404 in case of an invalid error.
+          if (error.message === 'invalid') {
+            this.$nuxt.error({
+              statusCode: 404,
+              message: 'This form could not be found.'
+            })
 
-        // Redirect to 498 in case of an expired link.
-        } else if (error.message === 'expired') {
-          this.$nuxt.error({
-            statusCode: 498,
-            message: 'This link has expired.'
-          })
+          // Redirect to 498 in case of an expired link.
+          } else if (error.message === 'expired') {
+            this.$nuxt.error({
+              statusCode: 498,
+              message: 'This link has expired.'
+            })
+          }
         }
       }
     },
@@ -104,7 +128,7 @@ export default {
     async respond () {
       // Send the response.
       const response = await this.$axios.post('forms/response/', {
-        link: this.$route.params.key,
+        link: this.linkKey,
         inputs: this.response
       })
 

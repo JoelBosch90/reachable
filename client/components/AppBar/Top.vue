@@ -66,12 +66,6 @@
 
 <script>
 export default {
-  props: {
-    scrollTarget: {
-      type: String,
-      default: ''
-    }
-  },
   data () {
     return {
       showDrawer: false,
