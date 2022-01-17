@@ -1,6 +1,8 @@
 <template>
-  <v-text-field
+  <component
+    :is="type == 'textarea' ? 'v-textarea' : 'v-text-field'"
     v-model="input"
+    :type="type"
     :label="label"
     :required="required"
     :hint="hint"
@@ -32,6 +34,11 @@ export default {
     value: {
       type: String,
       default: ''
+    },
+    // This is the input type.
+    type: {
+      type: String,
+      default: 'text'
     },
     // Set the validation rules.
     rules: {

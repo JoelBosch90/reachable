@@ -2,6 +2,7 @@
   <v-form
     ref="form"
     v-model="valid"
+    class="text"
     @submit.prevent="onSubmit"
   >
     <p
@@ -15,7 +16,7 @@
       type="submit"
       color="success"
       class="mt-4"
-      :disabled="!valid"
+      :disabled="!valid || (form && form.disabled)"
       @click="validate"
     >
       {{ submit }}
