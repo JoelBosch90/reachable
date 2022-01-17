@@ -1,40 +1,18 @@
 <template>
-  <v-card>
-    <v-card-title>
-      <h1 class="display-1">
-        Create new form
-      </h1>
-    </v-card-title>
-    <v-card-text>
-      <Form
-        ref="form"
-        v-model="form"
-        @submit="createLink"
-      >
-        <FormInput
-          v-model="form.name"
-          :label="inputs.name.label"
-          :required="inputs.name.required"
-          :rules="inputs.name.rules"
-          :hint="inputs.name.hint"
-        />
-        <FormInput
-          v-model="form.description"
-          :label="inputs.description.label"
-          :required="inputs.description.required"
-          :rules="inputs.description.rules"
-          :hint="inputs.description.hint"
-        />
-        <FormInput
-          v-model="form.email"
-          :label="inputs.email.label"
-          :required="inputs.email.required"
-          :rules="inputs.email.rules"
-          :hint="inputs.email.hint"
-        />
-      </Form>
-    </v-card-text>
-  </v-card>
+  <Form
+    ref="form"
+    v-model="form"
+    submit="Create form"
+    @submit="createLink"
+  >
+    <FormInput
+      v-model="form.email"
+      :label="inputs.email.label"
+      :required="inputs.email.required"
+      :rules="inputs.email.rules"
+      :hint="inputs.email.hint"
+    />
+  </Form>
 </template>
 
 <script>
@@ -42,27 +20,13 @@ export default {
   data () {
     return {
       form: {
-        name: '',
-        description: '',
+        name: 'Contact me!',
+        description: 'You can use the form below to contact me. Please' +
+                     ' include your contact details if you want me to reach' +
+                     ' back out to you!',
         email: ''
       },
       inputs: {
-        name: {
-          label: 'Name',
-          rules: [
-            value => !!value || 'Please name your form.'
-          ],
-          hint: 'This name is used in the form and in your UI.',
-          required: true
-        },
-        description: {
-          label: 'Description',
-          rules: [],
-          hint: 'This description will be shown near your form. You can use' +
-                ' this to explain the form\'s purpose or ask questions to' +
-                ' your respondents.',
-          required: false
-        },
         email: {
           label: 'Email address',
           rules: [
@@ -73,7 +37,7 @@ export default {
             value => /.+@.+\..+/.test(value) || 'Please supply a valid email' +
                                                 ' address.'
           ],
-          hint: 'Any responses to this form will be sent to this email' +
+          hint: 'Any responses to the form will be sent to this email' +
                 ' address.',
           required: true
         }

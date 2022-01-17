@@ -1,16 +1,16 @@
 <template>
-  <v-app>
-    <v-container>
-      <v-row>
-        <v-col>
-          <FormURL :link="link" />
-        </v-col>
-        <v-col>
-          <FormQR :link="link" />
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-app>
+  <v-container
+    class="my-8"
+  >
+    <v-row>
+      <v-col>
+        <FormURL :link="link" />
+      </v-col>
+      <v-col>
+        <FormQR :link="link" />
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>

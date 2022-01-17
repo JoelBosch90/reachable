@@ -18,7 +18,7 @@
       :disabled="!valid"
       @click="validate"
     >
-      Submit
+      {{ submit }}
     </v-btn>
   </v-form>
 </template>
@@ -29,6 +29,10 @@ export default {
     form: {
       type: Object,
       default: null
+    },
+    submit: {
+      type: String,
+      default: 'Submit'
     }
   },
   data () {

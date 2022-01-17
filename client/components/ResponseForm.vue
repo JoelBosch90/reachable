@@ -70,8 +70,6 @@ export default {
         const response = await this.$axios.get('forms/link/' +
                                                this.$route.params.key)
 
-        console.log(response)
-
         // If we cannot get the form, we should throw an error.
         if (!response || !response.data) {
           throw new Error('invalid')

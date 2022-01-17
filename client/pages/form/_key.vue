@@ -1,9 +1,9 @@
 <template>
-  <v-app>
-    <v-container>
-      <ResponseForm />
-    </v-container>
-  </v-app>
+  <v-container
+    class="my-8"
+  >
+    <ResponseForm />
+  </v-container>
 </template>
 
 <script>
