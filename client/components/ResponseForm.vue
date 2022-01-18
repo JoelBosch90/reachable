@@ -89,39 +89,15 @@ export default {
     async load () {
       // Don't try to load anything without a link key.
       if (this.linkKey) {
-        try {
-          // Get the information about the form.
-          const response = await this.$axios.get('forms/link/' + this.linkKey)
+        // Get the information about the form.
+        const response = await this.$axios.get('forms/link/' + this.linkKey)
 
-          // If we cannot get the form, we should throw an error.
-          if (!response || !response.data) {
-            throw new Error('invalid')
+        // If we cannot get the form, we redirect to the error page.
+        if (!response || !response.data) {
+          this.$router.push({ name: 'error-notfound' })
 
-          // Check if we're dealing with an expired link.
-          } else if (response.data === 'expired') {
-            throw new Error('expired')
-
-          // Otherwise, extract the data from the response to populate the form.
-          } else { this.form = JSON.parse(response.data) }
-
-        // If we cannot load the form, we should just go tell the user that we
-        // cannot find the form.
-        } catch (error) {
-          // Redirect to 404 in case of an invalid error.
-          if (error.message === 'invalid') {
-            this.$nuxt.error({
-              statusCode: 404,
-              message: 'This form could not be found.'
-            })
-
-          // Redirect to 498 in case of an expired link.
-          } else if (error.message === 'expired') {
-            this.$nuxt.error({
-              statusCode: 498,
-              message: 'This link has expired.'
-            })
-          }
-        }
+        // Otherwise, extract the data from the response to populate the form.
+        } else { this.form = JSON.parse(response.data) }
       }
     },
     // Method to send a response with the current form submission.

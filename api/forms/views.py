@@ -135,12 +135,18 @@ class FormConfirmationView(generics.RetrieveAPIView):
         page.
         """
 
-        # Get the confirmation link.
-        confirmationLink = get_object_or_404(FormConfirmationLink, key=key)
+        # Try to get the confirmation link.
+        try:
+          confirmationLink = FormConfirmationLink.objects.get(key=key)
+
+        # If we cannot find the confirmation link, we should redirect to the
+        # website's normal 404 page.
+        except FormConfirmationLink.DoesNotExist:
+            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/error/notfound")
 
         # Explain to the user that this link has expired.
         if confirmationLink.hasExpired():
-            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/expired")
+            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/error/expired")
 
         # Get access to the form object.
         form = confirmationLink.formLink.form
@@ -189,11 +195,17 @@ class FormDisableView(generics.RetrieveAPIView):
 
     def get(self, request, key, format=None):
         """
-        Disable the form, then redirect to a proper
+        Disable the form, then redirect to a disabled form.
         """
 
-        # Get the disable link.
-        disableLink = get_object_or_404(FormDisableLink, key=key)
+        # Try to get the disable link.
+        try:
+          disableLink = FormDisableLink.objects.get(key=key)
+
+        # If we cannot find the disable link, we should redirect to the
+        # website's normal 404 page.
+        except FormDisableLink.DoesNotExist:
+            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/error/notfound")
 
         # Update the form.
         formSerializer = FormSerializer(
@@ -284,11 +296,11 @@ class FormLinkView(generics.RetrieveAPIView):
 
         # Check if the link has expired.
         if formLink.hasExpired():
-            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/expired")
+            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/error/expired")
 
         # If the form has been disabled, we should not show it.
         if (formLink.form.disabled):
-            return response.Response('disabled')
+            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/error/notfound")
 
         # Construct the response object.
         result = {

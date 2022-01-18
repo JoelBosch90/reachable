@@ -7,6 +7,21 @@
       Do you want to create your own contact form, and control its name and its
       description? Look no further: this is what you need!
     </p>
-    <CustomForm />
+    <CreateCustomForm @created="onCreated" />
   </v-container>
 </template>
+
+<script>
+export default {
+  methods: {
+    // Method to call when a new form was created.
+    onCreated (key) {
+      // Redirect to the share page for this form.
+      this.$router.push({
+        name: 'form-share-key',
+        params: { key }
+      })
+    }
+  }
+}
+</script>

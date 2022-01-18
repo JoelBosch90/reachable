@@ -23,6 +23,7 @@
           </v-icon>
           {{ item.title }}
         </v-btn>
+
         <v-btn
           class="hidden-sm-and-up"
           text
@@ -38,7 +39,7 @@
 
     <v-navigation-drawer
       v-model="showDrawer"
-      absolute
+      fixed
       temporary
       right
     >
@@ -53,6 +54,7 @@
               {{ item.icon }}
             </v-icon>
           </v-list-item-icon>
+
           <v-list-item-content>
             <v-list-item-title>
               {{ item.title }}
