@@ -29,7 +29,7 @@ services:
     container_name: reachable.proxy.development
 
     # We can use the latest version of Nginx.
-    image: nginx:latest
+    image: nginx:1.21.0
 
     # We want to expose at port 8004.
     ports:
@@ -161,8 +161,8 @@ services:
   database:
     container_name: reachable.database.development
 
-    # We can pull the latest MongoDB version. Running this older version because
-    # my local machine lacks the AVX support for Mongo 5+.
+    # Running this older version because my local machine lacks the AVX support
+    # for Mongo 5+.
     image: mongo:4.4.6
 
     # We can expose the default MongoDB port database service in the proxy

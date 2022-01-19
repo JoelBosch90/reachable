@@ -1,5 +1,5 @@
 # Use the latest version of Python.
-FROM python:latest
+FROM python:3.9.7
 
 # Create a user with default privileges as a worker.
 RUN useradd --shell /bin/bash --create-home worker
