@@ -6,17 +6,34 @@
     @submit.prevent="onSubmit"
   >
     <p
-      v-show="error"
-      class="error--text"
+      v-if="error"
+      class="body-1 error--text"
     >
       {{ error }}
     </p>
-    <slot />
+    <p
+      v-else-if="formDisabled"
+      class="body-1 error--text"
+    >
+      This form has been disabled and cannot currently be used.
+    </p>
+    <FormInput
+      v-for="input in form.inputs"
+      :key="input.name"
+      v-model="responses[input.name]"
+      :name="input.name"
+      :label="input.label"
+      :hint="input.hint"
+      :required="input.required"
+      :type="input.type"
+      :rules="input.rules"
+      :disabled="input.disabled || formDisabled"
+    />
     <v-btn
       type="submit"
       color="success"
       class="mt-4"
-      :disabled="!valid || (form && form.disabled)"
+      :disabled="!valid || formDisabled"
       @click="validate"
     >
       {{ submit }}
@@ -38,16 +55,22 @@ export default {
   },
   data () {
     return {
+      responses: this.form.defaults || {},
       // The form is invalid by default. We assume there should be some kind of
       // input for a useful form.
       valid: false,
       error: ''
     }
   },
+  computed: {
+    formDisabled () {
+      return this.form && this.form.disabled
+    }
+  },
   methods: {
     // Let the parent component handle submit events.
     onSubmit () {
-      this.$emit('submit', this.form)
+      this.$emit('submit', this.responses)
     },
     // Use Vuetify to validate the form.
     validate () {

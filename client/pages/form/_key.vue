@@ -1,6 +1,6 @@
 <template>
   <v-container class="my-8">
-    <ResponseForm :link-key="$route.params.key" />
+    <ResponseForm :form-key="$route.params.key" />
   </v-container>
 </template>
 

@@ -42,14 +42,14 @@ class FormListView(generics.CreateAPIView):
         if userSerializer.is_valid():
 
             # We should create the user if we don't have it yet.
-            userSerializer.save()
+            user = userSerializer.save()
 
         # Get access to the user object.
         user = get_object_or_404(User, email=request.data['email'])
 
         # Create a new form.
         formSerializer = FormSerializer(data={
-            'user': user.email,
+            'user': user.pk,
             'name': request.data['name'],
             'description': request.data['description']
         })
@@ -61,10 +61,15 @@ class FormListView(generics.CreateAPIView):
         form = formSerializer.save()
 
         # Add a message input to the form.
+        # @todo: We currently only support this input field, but we can make
+        # this app much more powerful when we don't!
         inputSerializer = InputSerializer(data={
-            'name': "Message",
-            'title': "Add a message to send to the form's owner.",
-            'form': form.id
+            'name': "message",
+            'label': "Message",
+            'hint': "Add a message to send to the form's owner.",
+            'required': True,
+            'type': 'textarea',
+            'form': form.pk
         })
 
         # If it is not a input form request, let the client know.
@@ -75,7 +80,7 @@ class FormListView(generics.CreateAPIView):
 
         # Create a new link for this form.
         formLinkSerializer = FormLinkSerializer(data={
-            'form': form.id
+            'form': form.pk
         })
 
         # If we cannot create a link, let the client know.
@@ -107,8 +112,13 @@ class FormResponseView(generics.CreateAPIView):
         # Get the form.
         formLink = get_object_or_404(FormLink, key=request.data['link'])
 
+        # Check if the owner has confirmed this form. We should not yet be
+        # sending responses if the form is not confirmed.
+        if type(formLink.form.confirmed) is not datetime.datetime:
+            return response.Response(False)
+
         # Check if the owner has disabled the form. We should no longer be
-        # sending responses.
+        # sending responses if the form has been disabled.
         if formLink.form.disabled:
             return response.Response(False)
 
@@ -298,15 +308,8 @@ class FormLinkView(generics.RetrieveAPIView):
         if formLink.hasExpired():
             return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/error/expired")
 
-        # If the form has been disabled, we should not show it.
-        if (formLink.form.disabled):
-            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/error/notfound")
-
         # Construct the response object.
         result = {
-
-            # We need to know which form needs to be submitted.
-            'id': formLink.form.id,
 
             # Add the form's name.
             'name': formLink.form.name,
@@ -314,13 +317,19 @@ class FormLinkView(generics.RetrieveAPIView):
             # Add the form's description.
             'description': formLink.form.description,
 
+            # Pass on if the form's been disabled.
+            'disabled': formLink.form.disabled,
+
             # Pass on if the form's been confirmed yet.
             'confirmed': type(formLink.form.confirmed) is datetime.datetime,
 
             # We need to know all inputs.
             'inputs': [{
                 'name': input.name,
-                'title': input.title
+                'label': input.label,
+                'hint': input.hint,
+                'required': input.required,
+                'type': input.type,
             } for input in formLink.form.inputs.all()]
         }
 

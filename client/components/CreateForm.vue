@@ -3,17 +3,7 @@
     ref="form"
     :form="form"
     @submit="createLink"
-  >
-    <FormInput
-      v-for="input in inputs"
-      :key="input.name"
-      v-model="input.value"
-      :label="input.label"
-      :required="input.required"
-      :rules="input.rules"
-      :hint="input.hint"
-    />
-  </Form>
+  />
 </template>
 
 <script>
@@ -26,25 +16,12 @@ export default {
           disabled: true
         }
       }
-    },
-    inputs: {
-      type: Array,
-      default () {
-        return []
-      }
     }
   },
   methods: {
     // On submit, we want to attempt to create a new link with the information
     // submitted in the form.
-    async createLink () {
-      // Map the input field names to their values.
-      const formData = this.inputs.reduce((accumulator, input) => {
-        return { ...accumulator, [input.name]: input.value }
-
-      // Start with the default fields in the form object.
-      }, this.form)
-
+    async createLink (formData) {
       // Create the form, and get the key.
       const response = await this.$axios.post('forms/', formData)
         .catch((error) => {

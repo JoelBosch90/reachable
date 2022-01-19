@@ -28,7 +28,7 @@
         </v-btn>
       </v-toolbar>
       <v-card-text v-if="selected == 'form'">
-        <ResponseForm :link-key="formKey" />
+        <ResponseForm :form-key="formKey" />
       </v-card-text>
       <v-card-text v-if="selected == 'qr'">
         <FormQR :link="link" />

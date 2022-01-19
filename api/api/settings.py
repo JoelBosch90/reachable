@@ -150,11 +150,6 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, "static")
 # Declare where we"re hosting the static files for this project.
 STATIC_URL = "/api/static/"
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
 # Email settings.
 # https://docs.djangoproject.com/en/3.2/topics/email/
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

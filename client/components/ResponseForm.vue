@@ -1,7 +1,7 @@
 <template>
   <v-container class="text">
     <p
-      v-if="form.id != 0 && !form.confirmed"
+      v-if="form.id != 0 && !form.confirmed && !responded"
       class="body-1 error--text"
     >
       This form cannot register any responses because it has not yet been
@@ -12,31 +12,15 @@
     <h1 class="display-1">
       {{ form.name }}
     </h1>
-    <p
-      v-if="error"
-      class="body-1 error--text"
-    >
-      {{ error }}
-    </p>
-    <div v-else-if="!responded">
+    <div v-if="!responded">
       <p class="body-1">
         {{ form.description }}
       </p>
       <Form
         ref="form"
-        v-model="form"
+        :form="form"
         @submit="respond"
-      >
-        <FormInput
-          v-for="input in form.inputs"
-          :key="input.name"
-          v-model="response[input.name]"
-          :label="input.name"
-          :hint="input.title"
-          :required="true"
-          type="textarea"
-        />
-      </Form>
+      />
     </div>
     <p
       v-else
@@ -52,7 +36,7 @@
 <script>
 export default {
   props: {
-    linkKey: {
+    formKey: {
       type: String,
       default: ''
     }
@@ -67,30 +51,27 @@ export default {
         inputs: [],
         confirmed: false
       },
-      // This is the input that the user has added to the form.
-      response: {},
-      responded: false,
-      error: ''
+      responded: false
     }
   },
   watch: {
-    linkKey: {
+    formKey: {
       immediate: true,
-      // Try to load the
+      // Try to load the form as soon as we have a (new) form key.
       handler: 'load'
     }
   },
   mounted () {
-    // Immediately load the form if we already have a link key.
+    // Immediately load the form if we already have a form key.
     this.load()
   },
   methods: {
     // Method to load the form from from the server.
     async load () {
-      // Don't try to load anything without a link key.
-      if (this.linkKey) {
+      // Don't try to load anything without a form key.
+      if (this.formKey) {
         // Get the information about the form.
-        const response = await this.$axios.get('forms/link/' + this.linkKey)
+        const response = await this.$axios.get('forms/link/' + this.formKey)
 
         // If we cannot get the form, we redirect to the error page.
         if (!response || !response.data) {
@@ -101,11 +82,11 @@ export default {
       }
     },
     // Method to send a response with the current form submission.
-    async respond () {
+    async respond (formData) {
       // Send the response.
       const response = await this.$axios.post('forms/response/', {
-        link: this.linkKey,
-        inputs: this.response
+        link: this.formKey,
+        inputs: formData
       })
 
       // If we got a valid response, we can show the user that the response has

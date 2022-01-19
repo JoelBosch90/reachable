@@ -9,3 +9,6 @@
 
 ## Run the server
 `python manage.py runserver`
+
+## Create a superuser login to use for accessing the Django adminstration UI
+`python manage.py createsuperuser`

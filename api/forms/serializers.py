@@ -1,13 +1,45 @@
 from rest_framework import serializers
 from .models import (
-  TimeStamped, User, Form, Link, FormLink, FormConfirmationLink,
+  Entity, TimeStamped, User, Form, Link, FormLink, FormConfirmationLink,
   FormDisableLink, Input
 )
 
-
-class UserSerializer(serializers.ModelSerializer):
+class EntitySerializer(serializers.ModelSerializer):
     """
-    This serializer knows how to construct a User object.
+    Serializer to build a base Entity model.
+    """
+
+    class Meta:
+        """
+        Specification of how a base Entity model is serialized.
+        """
+
+        model = Entity
+        fields = [
+            "id"
+        ]
+
+
+class TimeStampedSerializer(EntitySerializer):
+    """
+    Serializer to build a TimeStamped model.
+    """
+
+    class Meta(EntitySerializer.Meta):
+        """
+        Specification of how a TimeStamped model is serialized.
+        """
+
+        model = TimeStamped
+        fields = EntitySerializer.Meta.fields + [
+            "created",
+            "updated"
+        ]
+
+
+class UserSerializer(TimeStampedSerializer):
+    """
+    Serializer to build a User model.
     """
 
     # List the forms that are connected to this user.
@@ -17,22 +49,22 @@ class UserSerializer(serializers.ModelSerializer):
         slug_field='name',
     )
 
-    class Meta:
+    class Meta(TimeStampedSerializer.Meta):
         """
-        Specification of how the User model is serialized.
+        Specification of how a User model is serialized.
         """
 
         model = User
-        fields = [
+        fields = TimeStampedSerializer.Meta.fields + [
             "email",
             "forms",
             "verified",
         ]
 
 
-class FormSerializer(serializers.ModelSerializer):
+class FormSerializer(TimeStampedSerializer):
     """
-    This serializer knows how to construct a Form object.
+    Serializer to build a Form model.
     """
 
     # List the inputs and links that are connected to this user.
@@ -47,14 +79,13 @@ class FormSerializer(serializers.ModelSerializer):
         slug_field='key',
     )
 
-    class Meta:
+    class Meta(TimeStampedSerializer.Meta):
         """
-        Specification of how the Form model is serialized.
+        Specification of how a Form model is serialized.
         """
 
         model = Form
-        fields = [
-            "id",
+        fields = TimeStampedSerializer.Meta.fields + [
             "user",
             "name",
             "description",
@@ -64,77 +95,96 @@ class FormSerializer(serializers.ModelSerializer):
             "disabled"
         ]
         extra_kwargs = {
-            "description": {"required": False},
+            "description": { "required": False },
         }
 
 
-class FormLinkSerializer(serializers.ModelSerializer):
+class LinkSerializer(TimeStampedSerializer):
     """
-    This serializer knows how to construct a FormLink object.
+    Serializer to build a Link model.
     """
 
-    class Meta:
+    class Meta(TimeStampedSerializer.Meta):
         """
-        Specification of how the FormLink model is serialized.
+        Specification of how a Link model is serialized.
+        """
+
+        model = Link
+        fields = TimeStampedSerializer.Meta.fields + [
+            "key"
+        ]
+
+
+class FormLinkSerializer(LinkSerializer):
+    """
+    Serializer to build a FormLink model.
+    """
+
+    class Meta(LinkSerializer.Meta):
+        """
+        Specification of how a FormLink model is serialized.
         """
 
         model = FormLink
-        fields = [
+        fields = LinkSerializer.Meta.fields + [
             "form",
-            "key",
         ]
 
 
-class FormConfirmationLinkSerializer(serializers.ModelSerializer):
+class FormConfirmationLinkSerializer(LinkSerializer):
     """
-    This serializer knows how to construct a FormConfirmationLink object.
+    Serializer to build a FormConfirmationLink model.
     """
 
-    class Meta:
+    class Meta(LinkSerializer.Meta):
         """
-        Specification of how the FormConfirmationLink model is serialized.
+        Specification of how a FormConfirmationLink model is serialized.
         """
 
         model = FormConfirmationLink
-        fields = [
+        fields = LinkSerializer.Meta.fields + [
             "formLink",
-            "key",
         ]
 
 
-class FormDisableLinkSerializer(serializers.ModelSerializer):
+class FormDisableLinkSerializer(LinkSerializer):
     """
-    This serializer knows how to construct a FormDisableLink object.
+    Serializer to build a FormDisableLink model.
     """
 
-    class Meta:
+    class Meta(LinkSerializer.Meta):
         """
-        Specification of how the FormDisableLink model is serialized.
+        Specification of how a FormDisableLink model is serialized.
         """
 
         model = FormDisableLink
-        fields = [
+        fields = LinkSerializer.Meta.fields + [
             "formLink",
-            "key",
         ]
 
 
-class InputSerializer(serializers.ModelSerializer):
+class InputSerializer(TimeStampedSerializer):
     """
-    This serializer knows how to construct an Input object.
+    Serializer to build a Input model.
     """
 
-    class Meta:
+    class Meta(TimeStampedSerializer.Meta):
         """
-        Specification of how the Input model is serialized.
+        Specification of how a Input model is serialized.
         """
 
         model = Input
-        fields = [
+        fields = TimeStampedSerializer.Meta.fields + [
             "form",
             "name",
-            "title",
+            "label",
+            "hint",
+            "required",
+            "type",
         ]
         extra_kwargs = {
-            "title": {"required": False},
+            "label": { "required": False },
+            "hint": { "required": False },
+            "required": { "required": False },
+            "type": { "required": False },
         }

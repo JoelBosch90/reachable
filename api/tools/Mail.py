@@ -21,7 +21,7 @@ class FormConfirmationMail:
 
         # Create a new confirmation link for this form.
         confirmationLinkSerializer = FormConfirmationLinkSerializer(data={
-            'formLink': link.key,
+            'formLink': link.pk,
         })
 
         # Check if this link is valid.
@@ -32,7 +32,7 @@ class FormConfirmationMail:
 
         # Create a new disable link for this form.
         disableLinkSerializer = FormDisableLinkSerializer(data={
-            'formLink': link.key,
+            'formLink': link.pk,
         })
 
         # Check if this link is valid.
@@ -80,14 +80,14 @@ class FormResponseMail:
     owner of the form.
     """
 
-    def send(self, link, inputs):
+    def send(self, link, responses):
         """
         Method to send the response email.
         """
 
         # Create a new disable link for this form.
         disableLinkSerializer = FormDisableLinkSerializer(data={
-            'formLink': link.key,
+            'formLink': link.pk,
         })
 
         # Check if this link is valid.
@@ -96,13 +96,17 @@ class FormResponseMail:
         # Save the serializer to get the disabled link.
         disableURL = disableLinkSerializer.save().url()
 
+        # Get the label with each response.
+        labeled = [(link.form.inputs.filter(name=name).first().label, response)
+                   for name, response in responses.items()]
+
         # Add an introduction to the message.
         message = "Hey there, form builder!\n\nYou just received a new" \
                   f" submission for your '{link.form.name}' form:\n\n"
 
+
         # Now list out the name and submission text for every input.
-        message += "\n\n".join(f"{name}\n{text}"
-                               for name, text in inputs.items())
+        message += "\n\n".join(f"{label}\n{text}" for label, text in labeled)
 
         # Add a closing greeting to the mail.
         message += "\n\nGreetings,\nYour friends @ Reachable"

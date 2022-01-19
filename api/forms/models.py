@@ -1,18 +1,41 @@
 import secrets
 import os
-from django.db import models
+from djongo import models
 from django.utils import timezone
 from datetime import timedelta
 
 
-class TimeStamped(models.Model):
+class Entity(models.Model):
     """
-    Abstract base class to add time stamps to models.
+    Abstract base model that adds an ID primary key that every class should
+    have.
     """
+
+    # Add an automatic primary key.
+    id = models.ObjectIdField(db_column="_id", primary_key=True)
+
+    class Meta:
+        """
+        Make this an abstract class.
+        """
+        abstract = True
+
+
+class TimeStamped(Entity):
+    """
+    Abstract model to add time stamps to models.
+    """
+
+    # Make sure that we always know when a timestamped model was created.
     created = models.DateTimeField(auto_now_add=True)
+
+    # Make sure that we always know when a timestamped model was last updated.
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
+        """
+        Make this an abstract class.
+        """
         abstract = True
 
 
@@ -23,7 +46,7 @@ class User(TimeStamped):
     """
 
     # Users are identified by their email address.
-    email = models.CharField(max_length=320, unique=True, primary_key=True)
+    email = models.CharField(max_length=320, unique=True)
 
     # Flag to record when (if ever) ownership of the email address was
     # verified.
@@ -42,9 +65,6 @@ class Form(TimeStamped):
     """
     This model represents a single form.
     """
-
-    # Add an automatic primary key.
-    id = models.AutoField(primary_key=True)
 
     # A form is always tied to a user.
     user = models.ForeignKey(User, related_name='forms',
@@ -109,8 +129,7 @@ class Link(TimeStamped):
     # A link is identified by this key. Every link should be unique, regardless
     # of the form it is attached to. It should have a reasonable length to fit
     # a URL.
-    key = models.CharField(max_length=128, primary_key=True,
-                           default=generate_key)
+    key = models.CharField(max_length=128, unique=True, default=generate_key)
 
     def default_expire_date():
         """
@@ -252,8 +271,17 @@ class Input(TimeStamped):
     # An input is identified by a name that is unique for each form.
     name = models.CharField(max_length=256)
 
+    # Optionally, an input can be labeled.
+    label = models.CharField(max_length=256, blank=True, null=True)
+
     # Optionally, we can define a tooltip attribute.
-    title = models.CharField(max_length=512, blank=True, null=True)
+    hint = models.CharField(max_length=512, blank=True, null=True)
+
+    # Optionally, we can make an input field required.
+    required = models.BooleanField(default=False)
+
+    # Optionally, we can set an input type.
+    type = models.CharField(max_length=256, default='text')
 
     class Meta:
         """
