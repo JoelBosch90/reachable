@@ -13,15 +13,6 @@ export default {
     ]
   },
 
-  // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [
-    // Import our own styles.
-    '~/assets/styles/main.scss'
-  ],
-
-  // Make sure we reload when SCSS files are changed.
-  watch: ['~/assets/*.scss'],
-
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
     '~/plugins/axios'
