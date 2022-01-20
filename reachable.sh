@@ -56,10 +56,10 @@ WORKDIR="$(dirname "$(readlink -f "$0")")"
 updateProject () {
 
   # Visit the project directory.
-  cd $WORKDIR;
+  cd $WORKDIR
 
   # Update to the latest version from the repository.
-  git pull;
+  git pull
 }
 
 ################################################################################
@@ -71,7 +71,7 @@ updateProject () {
 runDevelopment () {
 
   # Visit the project directory.
-  cd $WORKDIR;
+  cd $WORKDIR
 
   # Make sure we can run Docker. This config file is not needed and on Windows
   # it can cause some odd bugs causing Docker to fail.
@@ -111,7 +111,7 @@ runProduction () {
 release () {
 
   # Visit the project directory.
-  cd $WORKDIR;
+  cd $WORKDIR
 
   # Visit the stable branch.
   git checkout stable
@@ -121,6 +121,9 @@ release () {
 
   # Push the new changes to the stable branch.
   git push
+
+  # Go back to the previous branch.
+  git checkout -
 }
 
 ################################################################################
@@ -133,7 +136,7 @@ release () {
 commit () {
 
   # Visit the project directory.
-  cd $WORKDIR;
+  cd $WORKDIR
 
   # Add all changes to this commit.
   git add .

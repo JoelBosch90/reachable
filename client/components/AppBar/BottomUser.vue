@@ -9,9 +9,16 @@
       tile
     >
       <v-card-text class="text-center">
-        <span class="body-1">
+        <span
+          class="body-1 hidden-xs-only"
+        >
           Do you also want to create nifty forms like this one? Visit the links
           below to find out how!
+        </span>
+        <span
+          class="body-1 hidden-sm-and-up"
+        >
+          Also want a form? Click below!
         </span>
       </v-card-text>
 
@@ -21,23 +28,16 @@
             v-for="item in items"
             :key="item.title"
             :to="item.link"
-            class="hidden-xs-only"
             text
           >
             <v-icon small left>
               {{ item.icon }}
             </v-icon>
-            {{ item.title }}
-          </v-btn>
-          <v-btn
-            class="hidden-sm-and-up"
-            text
-            @click.stop="showDrawer = !showDrawer"
-          >
-            <v-icon small left>
-              mdi-menu
-            </v-icon>
-            Menu
+            <span
+              class="hidden-xs-only"
+            >
+              {{ item.title }}
+            </span>
           </v-btn>
         </v-toolbar-items>
       </v-card-title>
@@ -53,7 +53,6 @@
 export default {
   data () {
     return {
-      showDrawer: false,
       items: [
         { title: 'Home', link: '/', icon: 'mdi-home' },
         { title: 'Custom', link: '/form/custom', icon: 'mdi-pencil' },
