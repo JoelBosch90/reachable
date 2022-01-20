@@ -66,12 +66,12 @@ class FormConfirmationMail:
         })
 
         # Construct the text version.
-        textVersion = "Visit the following link to confirm  your email" \
-                      " address and activate this form:\n" \
-                      f"{confirmationURL}\n\nEnjoy your form!" \
-                      "\n\nP.S. No longer want to receive responses from" \
-                      " this form? You can disable this form by visiting the" \
-                      f" following link:\n{disableURL}"
+        text = "Visit the following link to confirm  your email address and" \
+               f" activate this form:\n{confirmationURL}\n\n" \
+               "Enjoy your form!\n\n" \
+               "P.S. No longer want to receive responses from this form? You" \
+               " can disable this form by visiting the following link:\n" \
+               f"{disableURL}"
 
         send_mail(
 
@@ -79,7 +79,7 @@ class FormConfirmationMail:
             subject=f"Confirm your '{link.form.name}' form.",
 
             # Add the text version.
-            message=textVersion,
+            message=text,
 
             # Add the HTML version.
             html_message=template.html,
@@ -121,22 +121,41 @@ class FormResponseMail:
         labeled = [(link.form.inputs.filter(name=name).first().label, response)
                    for name, response in responses.items()]
 
-        # Add an introduction to the message.
-        message = "Hey there, form builder!\n\nYou just received a new" \
-                  f" submission for your '{link.form.name}' form:\n\n"
+        # Create the content message for the HTML email.
+        message = "".join(f"{label}<br/>{text}" for label, text in labeled)
 
+        # Create a template for a transactional email.
+        template = TransactionalTemplate()
+
+        # Load all content into the template.
+        template.replaceAll({
+            'preheader': "You just received a new submission for your" \
+                         f" '{link.form.name}' form!",
+            'title_text': "Hey there, form builder!",
+            'title_link': os.getenv('CLIENT_URL'),
+            'content': "You just received a new submission for your" \
+                       f" '{link.form.name}' form:<br/><br/>{message}",
+            'button_text': "TRY CUSTOM FORM",
+            'button_link': f"{os.getenv('CLIENT_URL')}form/custom",
+            'disable_link': disableURL,
+            'home_link': os.getenv('CLIENT_URL')
+        })
+
+        # Add an introduction to the message.
+        text = "Hey there, form builder!\n\nYou just received a new" \
+               f" submission for your '{link.form.name}' form:\n\n"
 
         # Now list out the name and submission text for every input.
-        message += "\n\n".join(f"{label}\n{text}" for label, text in labeled)
+        text += "\n\n".join(f"{label}\n{text}" for label, text in labeled)
 
         # Add a closing greeting to the mail.
-        message += "\n\nGreetings,\nYour friends @ Reachable"
+        text += "\n\nGreetings,\nYour friends @ Reachable"
 
         # We don't want to spam users, so we always add an option for the
         # receive to disable the form.
-        message += "\n\nP.S. No longer want to receive responses from this" \
-                   " form? You can disable this form by clicking the" \
-                   f" following link:\n{disableURL}"
+        text += "\n\nP.S. No longer want to receive responses from this" \
+                " form? You can disable this form by clicking the" \
+                f" following link:\n{disableURL}"
 
         send_mail(
 
@@ -144,7 +163,10 @@ class FormResponseMail:
             subject=f"Form submission for the '{link.form.name}' form.",
 
             # Add our message.
-            message=message,
+            message=text,
+
+            # Add the HTML version.
+            html_message=template.html,
 
             # Send a single email to the user.
             recipient_list=[link.form.user.email],
