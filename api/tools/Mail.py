@@ -1,7 +1,11 @@
-# Import dependenices.
+# Import dependencies.
+import os
 from django.core.mail import send_mail
 from forms.serializers import (
-  FormConfirmationLinkSerializer, FormDisableLinkSerializer
+    FormConfirmationLinkSerializer, FormDisableLinkSerializer
+)
+from tools.Template import (
+    TransactionalTemplate
 )
 
 
@@ -28,7 +32,7 @@ class FormConfirmationMail:
         confirmationLinkSerializer.is_valid(raise_exception=True)
 
         # Save the serializer to get the confirmation link.
-        confirmationURL= confirmationLinkSerializer.save().url()
+        confirmationURL = confirmationLinkSerializer.save().url()
 
         # Create a new disable link for this form.
         disableLinkSerializer = FormDisableLinkSerializer(data={
@@ -41,27 +45,44 @@ class FormConfirmationMail:
         # Save the serializer to get the disabled link.
         disableURL = disableLinkSerializer.save().url()
 
-        # Construct the message.
-        message = "Congratulations on creating your new form!\n\nClick" \
-                  " here to start accepting new submissions for the" \
-                  f" '{link.form.name}' form.\n\nVisit the following link to" \
-                  " confirm your email address and activate this form:\n" \
-                  f"{confirmationURL}\n\nEnjoy your form!"
+        # Create the content message for the HTML email. We can use this for
+        # both the content and the preheader.
+        content = "Click the button to start accepting new submissions for" \
+                  f" your brand new '{link.form.name}' form."
 
-        # Add a closing greeting to the mail.
-        message += "\n\nGreetings,\nYour friends @ Reachable"
+        # Create a template for a transactional email.
+        template = TransactionalTemplate()
 
-        # We don't want to spam users, so we always add an option for the
-        # receive to disable the form.
-        message += "\n\nP.S. No longer want to receive responses from this" \
-                   " form? You can disable this form by clicking the" \
-                   f" following link:\n{disableURL}"
+        # Load all content into the template.
+        template.replaceAll({
+            'preheader': content,
+            'title_text': "Congratulations on creating your new form!",
+            'title_link': confirmationURL,
+            'content': content,
+            'button_text': "CONFIRM",
+            'button_link': confirmationURL,
+            'disable_link': disableURL,
+            'home_link': os.getenv('CLIENT_URL')
+        })
+
+        # Construct the text version.
+        textVersion = "Visit the following link to confirm  your email" \
+                      " address and activate this form:\n" \
+                      f"{confirmationURL}\n\nEnjoy your form!" \
+                      "\n\nP.S. No longer want to receive responses from" \
+                      " this form? You can disable this form by visiting the" \
+                      f" following link:\n{disableURL}"
 
         send_mail(
 
             # Construct a confirmation message.
             subject=f"Confirm your '{link.form.name}' form.",
-            message=message,
+
+            # Add the text version.
+            message=textVersion,
+
+            # Add the HTML version.
+            html_message=template.html,
 
             # Send a single email to the user.
             recipient_list=[user.email],

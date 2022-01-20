@@ -1,0 +1,281 @@
+<!-- Inspired by Tutsplus.com: Build an HTML Email Template From Scratch by Nicole Merlin -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            font-family: 'Roboto', sans-serif;
+            font-size: 18px;
+            color: #1E1E1E;
+        }
+
+        table {
+            border-spacing: 0;
+        }
+
+        table td {
+            border-collapse: collapse;
+        }
+
+        img {
+            display: block !important;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        @media all and (max-width: 600px) {
+            table[class="container_600px"] {
+                width: 100%;
+                padding: 0 20px 0 20px;
+            }
+
+            table[class="container_560px"] {
+                width: 100%;
+                padding: 0 20px 0 20px;
+            }
+
+            img[class="image_fullwidth"] {
+                width: 100%;
+            }
+        }
+
+        @media all and (max-width: 480px) {
+            table[class="container_600px"] {
+                padding: 0 10px 0 10px;
+            }
+
+            table[class="container_560px"] {
+                padding: 0 0 0 0;
+            }
+
+            td[class="borders_600px"] {
+                border: none !important;
+            }
+        }
+
+        @media all and (max-width: 320px) {
+            table[class="container_600px"] {
+                padding: 0 5px 0 5px;
+            }
+        }
+    </style>
+
+    <title>{{TITLE_TEXT}}</title>
+</head>
+
+<body style="Margin: 0; padding: 0;" bgcolor="#1E1E1E">
+    <!-- START outer container -->
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#FFFFFF">
+        <tr>
+            <td>
+                <!-- START static width container-->
+                <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse;" class="container_600px">
+                    <tr>
+                        <td>
+                            <!-- START preheader container -->
+                            <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600" class="container_600px">
+                                <tr>
+                                    <td style="display: none !important; visibility: hidden; mso-hide: all; font-size: 1px; color: #ffffff;
+                                    line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">{{PREHEADER}}</td>
+                                </tr>
+                            </table>
+                            <!-- END preheader container -->
+                            <!-- START main container -->
+                            <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600" class="container_600px">
+                                <tr>
+                                    <td class="borders_600px" style="padding: 50px 20px 0 20px;">
+                                        <!-- START main side padding -->
+                                        <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="560" class="container_560px">
+                                            <!-- START main title -->
+                                            <tr>
+                                                <td style="padding: 0 0 5px">
+                                                    <a href="{{TITLE_LINK}}" target="_blank" style="color: #1E1E1E; text-decoration: none; font-size: 34px; line-height: 40px; font-family: 'Roboto', sans-serif; letter-spacing: 0.25px;">
+                                                        {{TITLE_TEXT}}
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <!-- END main title -->
+                                            <!-- START main content -->
+                                            <tr>
+                                                <td style="color:#1E1E1E; font-family: 'Roboto', sans-serif; font-size: 16px; line-height: 24px; letter-spacing: 0.5px;">
+                                                    {{CONTENT}}
+                                                </td>
+                                            </tr>
+                                            <!-- END main content -->
+                                            <!-- START main button -->
+                                            <tr>
+                                                <td style="padding: 16px 0 0;">
+                                                    <!-- START button -->
+                                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                                                        <tr>
+                                                            <td align="center" style="border-radius: 5px;" bgcolor="#1867c0">
+                                                                <a href="{{BUTTON_LINK}}" target="_blank" style="font-size: 14px; line-height: 21px; color: #FFFFFF; text-decoration: none; font-weight: bold; letter-spacing: 1.25px; border-radius: 5px; padding: 7px 15px 7px 15px; border: 1px solid #1867c0; display: inline-block; font-family: 'Roboto', sans-serif;">
+                                                                    {{BUTTON_TEXT}}
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <!-- END button -->
+                                                </td>
+                                            </tr>
+                                            <!-- END main button -->
+                                        </table>
+                                        <!-- END main side padding -->
+                                    </td>
+                                </tr>
+                                <!-- START extra padding -->
+                                <tr>
+                                    <td height="60px;">
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                                <!-- END extra padding -->
+                            </table>
+                            <!-- END main container -->
+                        </td>
+                    </tr>
+                </table>
+                <!-- END static width container-->
+            </td>
+        </tr>
+    </table>
+    <!-- END outer container -->
+    <!-- START outer container -->
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#1E1E1E">
+      <tr>
+          <td>
+              <!-- START static width container-->
+              <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse;" class="container_600px">
+                  <tr>
+                      <td>
+                          <!-- START tools container -->
+                          <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600" class="container_600px">
+                              <tr>
+                                  <td>
+                                      <!-- START tools side padding -->
+                                      <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="560" class="container_560px">
+                                          <tr>
+                                              <td style="padding: 20px 0 20px 0;">
+                                                  <!-- START tool explanation container -->
+                                                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                      <tr>
+                                                          <td width="100%" style="color: #616161; text-align: center;">
+                                                              No more responses from this form?
+                                                              <br/>
+                                                              Click below to disable it immediately.
+                                                          </td>
+                                                      </tr>
+                                                  </table>
+                                                  <!-- END tool explanation container -->
+                                              </td>
+                                          </tr>
+                                      </table>
+                                      <!-- END tools side padding -->
+                                  </td>
+                              </tr>
+                          </table>
+                          <!-- END tools container -->
+                      </td>
+                  </tr>
+              </table>
+              <!-- END static width container-->
+          </td>
+      </tr>
+  </table>
+  <!-- END outer container -->
+    <!-- START outer container -->
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#616161">
+      <tr>
+          <td>
+              <!-- START static width container-->
+              <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse;" class="container_600px">
+                  <tr>
+                      <td>
+                          <!-- START tools container -->
+                          <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600" class="container_600px">
+                              <tr>
+                                  <td>
+                                      <!-- START tools side padding -->
+                                      <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="560" class="container_560px">
+                                          <tr>
+                                              <td style="padding: 20px 0 20px 0;">
+                                                    <!-- START tool options container -->
+                                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                      <tr>
+                                                          <td width="100%" style="text-align: center;">
+                                                              <a href="{{DISABLE_LINK}}" target="_blank" style="color: #FFFFFF; text-decoration: none; font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: bold;">
+                                                                  DISABLE
+                                                              </a>
+                                                          </td>
+                                                      </tr>
+                                                  </table>
+                                                  <!-- END tool options container -->
+                                              </td>
+                                          </tr>
+                                      </table>
+                                      <!-- END tools side padding -->
+                                  </td>
+                              </tr>
+                          </table>
+                          <!-- END tools container -->
+                      </td>
+                  </tr>
+              </table>
+              <!-- END static width container-->
+          </td>
+      </tr>
+  </table>
+  <!-- END outer container -->
+    <!-- START outer container -->
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#1E1E1E">
+        <tr>
+            <td>
+                <!-- START static width container-->
+                <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse;" class="container_600px">
+                    <tr>
+                        <td>
+                            <!-- START footer container -->
+                            <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="600" class="container_600px">
+                                <tr>
+                                    <td>
+                                        <!-- START footer side padding -->
+                                        <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" width="560" class="container_560px">
+                                            <tr>
+                                                <td style="padding: 20px 0 50px 0;">
+                                                    <!-- START links container -->
+                                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                        <tr>
+                                                            <td width="100%" style="text-align: center;">
+                                                                <a href="{{HOME_LINK}}" target="_blank" style="color: #FFFFFF; text-decoration: none; font-family: 'Roboto', sans-serif; font-size: 14px;">
+                                                                    2022 - <b>Reachable</b>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <!-- END links container -->
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <!-- END footer side padding -->
+                                    </td>
+                                </tr>
+                            </table>
+                            <!-- END footer container -->
+                        </td>
+                    </tr>
+                </table>
+                <!-- END static width container-->
+            </td>
+        </tr>
+    </table>
+    <!-- END outer container -->
+</body>
+</html>
