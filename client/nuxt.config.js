@@ -43,10 +43,6 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios'
-    // https://github.com/nuxt-community/proxy-module
-    // '@nuxtjs/proxy',
-    // https://go.nuxtjs.dev/pwa
-    // '@nuxtjs/pwa'
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios

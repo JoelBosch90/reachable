@@ -23,7 +23,7 @@ ENV PYTHONUNBUFFERED=1
 RUN python -m pip install --upgrade pip
 
 # Install all dependencies.
-RUN pip install --no-cache-dir -r requirements-dev.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # We want to host the API at port 3000.
 EXPOSE 3000

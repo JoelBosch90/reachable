@@ -44,6 +44,7 @@ services:
     # The proxy needs access to the publicly accessible services.
     depends_on:
       - client
+      - api
 
     # We need access to all the services that should be exposed (partly)
     # publicly.
@@ -67,14 +68,15 @@ services:
       context: ./client/
       dockerfile: production.dockerfile
 
+    # Pass on the environment variables to the client service.
+    environment:
+      # Tell the client where to reach the client and the API.
+      - API_URL=https://reachable.joelbosch.nl/api/
+      - CLIENT_URL=https://reachable.joelbosch.nl/
+
     # We can expose the client service in the container network.
     expose:
       - "8000"
-
-    # Pass on the environment variables to the client service.
-    environment:
-      # Tell the client where to reach the API.
-      - API_URL=https://reachable.joelbosch.nl/api/
 
     # We need the reverse proxy to expose the client publicly, so we need to
     # give it access to the client service.
@@ -98,16 +100,106 @@ services:
       context: ./api/
       dockerfile: production.dockerfile
 
-    # We can expose the API  service in the container network.
+    # The api will need to some hosting information. Any external information
+    # that is not set in this file is expected to be supplied through
+    # environment variables.
+    environment:
+      # Tell the API where to reach the client and the API.
+      - API_URL=https://reachable.joelbosch.nl/api/
+      - CLIENT_URL=https://reachable.joelbosch.nl/
+
+      # Tell the API how to connect to the database.
+      - DATABASE_HOST=database
+      - DATABASE_PORT=27017
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+
+      # Tell the API how to connect to the mailserver.
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM=${SMTP_FROM}
+
+      # Tell the API we're not running in development mode.
+      - DEBUG=False
+
+      # Provide Django with the local secret key.
+      - SECRET=${DJANGO_SECRET}
+
+    # We can expose the api service in the container network.
     expose:
       - "3000"
 
-    # Pass on the environment variables to the API service.
-    environment:
-      # Tell the API where to find the client.
-      - CLIENT_URL=https://reachable.joelbosch.nl/
+    # The API will try to connect to the database, so we need to make sure that
+    # they are running before we initialize the API.
+    depends_on:
+      database:
+        condition: service_healthy
 
     # We need the reverse proxy to expose the API publicly, so we need to
-    # give it access to the API service.
+    # give it access to the API service. In addition, it needs to be able to
+    # communicate to the database, so it also requires access to the protected
+    # network.
     networks:
       - proxied
+      - protected
+
+  ##############################################################################
+  #
+  # Database
+  #   This is a NoSQL MongoDB database that we can use for scalable persistent
+  #   data. MongoDB will store any document, but we can configure specific
+  #   models and schemas in the API.
+  #
+  ##############################################################################
+  database:
+    container_name: reachable.database.production
+
+    # Running this older version because my local machine lacks the AVX support
+    # for Mongo 5+.
+    image: mongo:4.4.6
+
+    # We can expose the default MongoDB port database service in the proxy
+    # network.
+    expose:
+      - "27017"
+
+    # We need to designate a volume on physical disk to persist data between
+    # restarts.
+    volumes:
+      - ./database:/data/db
+
+    # We want to fire up MongoDB with the proper credentials.
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DATABASE_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${DATABASE_PASSWORD}
+
+    # We need a health check to see if the database is running correctly to make
+    # sure that we can restart the api to reconnect if any issues occur.
+    healthcheck:
+
+      # The health check command to run.
+      test: echo 'db.runCommand("ping").ok' | mongo database:27017/test --quiet
+
+      # The interval with which to perform the health check.
+      interval: 10s
+
+      # If a check takes longer than 10 seconds, we consider it failed.
+      timeout: 10s
+
+      # We retry the health check 3 times before we declare it unhealthy.
+      retries: 3
+
+      # We give the database 30 seconds to start up on initialization before we
+      # start declaring it unhealthy.
+      start_period: 30s
+
+    # We want to try and restart the database if any issues arise.
+    restart: always
+
+    # Only the api needs access to the database, so it does not need to be
+    # publicly available. We can add it to the protected network.
+    networks:
+      - protected

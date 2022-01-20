@@ -127,6 +127,12 @@ services:
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_FROM=${SMTP_FROM}
 
+      # Tell the API we're running in development mode.
+      - DEBUG=True
+
+      # Provide Django with the local secret key.
+      - SECRET=${DJANGO_SECRET}
+
     # We can expose the api service in the container network.
     expose:
       - "3000"

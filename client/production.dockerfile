@@ -29,7 +29,7 @@ RUN npm run build
 FROM build as release
 
 # After building, we can switch to production mode.
-ENV NODE_ENV=production
+ENV NODE_ENV production
 
 # Use the node user to run the install commands.
 USER node
