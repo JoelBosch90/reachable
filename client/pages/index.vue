@@ -22,11 +22,10 @@
         </div>
         <div v-else>
           <p class="body-1">
-            Let people contact you through a simple form. All responses are
-            automatically sent to your inbox and respondents will never know
-            your email address!
+            Create a simple form that people can use to send you emails without
+            knowing your email address.
             <br><br>
-            Create your form in a single click!
+            Get your form in two clicks!
           </p>
           <CreateContactForm @created="onCreated" />
         </div>

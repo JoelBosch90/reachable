@@ -12,8 +12,8 @@
     </div>
     <div v-else>
       <p class="body-1">
-        Do you want to create your own contact form, and control its name and
-        its description? Look no further: this is what you need!
+        Do you want more control over your form? Create a form and with a name
+        and description that you decide!
       </p>
       <CreateCustomForm @created="onCreated" />
     </div>
