@@ -10,11 +10,11 @@
       Why am I not allowed to visit this link?
     </h2>
     <p class="body-1">
-      There are several reasons why links may be forbidden to you:
+      There are several reasons why links may be forbidden:
     </p>
     <ul class="body-1">
       <li>
-        You may have tried to do something that is no longer allowed.
+        You may have tried to do something that is (no longer) allowed.
       </li>
       <li>
         This page may contain data that you are not meant to see.

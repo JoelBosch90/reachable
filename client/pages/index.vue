@@ -3,10 +3,10 @@
     <v-container class="fill-height pa-16">
       <v-row class="mb-8">
         <h1 class="text-center display-4 hidden-xs-only mx-auto">
-          Create new forms in seconds!
+          Create a form in seconds!
         </h1>
         <h1 class="text-center display-2 hidden-sm-and-up mx-auto">
-          Create new forms in seconds!
+          Create a form in seconds!
         </h1>
       </v-row>
       <v-container class="mx-auto text">

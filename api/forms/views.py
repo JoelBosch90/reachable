@@ -2,6 +2,7 @@
 import json
 import os
 import datetime
+import re
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, Http404
@@ -27,7 +28,45 @@ class FormListView(generics.CreateAPIView):
     # Everyone can create forms.
     permission_classes = [permissions.AllowAny]
 
-    def post(self, request, format=None):
+    def uniqueFormname(self, name, user):
+        """
+        Make sure that a form name is unique.
+        """
+
+        print(f"Find unique name for: {name}")
+
+        # We may have to try getting a unique name multiple times.
+        while True:
+
+            # First check if this form name is already for this user.
+            if (not Form.objects.filter(name=name, user=user).exists()):
+
+                # If so, simply return it.
+                return name
+
+            # Regex to find the number in a name. We assume that this number
+            # has a format of '(0)' and is at the end of the name.
+            regex = r'(?<=\()\d+(?=\)$)'
+
+            # Check if the name already ends in a number.
+            match = re.search(regex, name)
+
+            # Did we find a number?
+            if match:
+
+                # Extract the number, convert to integer and add 1.
+                newNumber = int(match.group(0), base=10) + 1
+
+                # Insert the new number into the name.
+                name = re.sub(regex, str(newNumber), name)
+
+            # Otherwise, we need to add a number.
+            else:
+                name += '(1)'
+
+            print(f"New name: {name}")
+
+    def post(self, request):
         """
         Create a new form.
         """
@@ -50,7 +89,9 @@ class FormListView(generics.CreateAPIView):
         # Create a new form.
         formSerializer = FormSerializer(data={
             'user': user.pk,
-            'name': request.data['name'],
+
+            # Make sure that the form's name is unique.
+            'name': self.uniqueFormname(request.data['name'], user),
             'description': request.data['description']
         })
 
