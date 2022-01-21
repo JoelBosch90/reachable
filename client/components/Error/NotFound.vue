@@ -6,7 +6,7 @@
     <p class="body-1">
       Unfortunately, the page you tried to find could not be found.
     </p>
-    <h2 class="display-1 mb-4 mt-12">
+    <h2 class="display-1 mb-4 mt-8">
       Why is this page missing?
     </h2>
     <p class="body-1">
@@ -26,5 +26,12 @@
         needed.
       </li>
     </ul>
+    <v-btn
+      class="mt-8"
+      color="info"
+      to="/"
+    >
+      Take me home
+    </v-btn>
   </v-container>
 </template>

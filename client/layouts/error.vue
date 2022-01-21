@@ -1,5 +1,5 @@
 <template>
-  <v-sheet>
+  <div class="my-8 mx-auto text">
     <ErrorExpired v-if="error.statusCode === 410" />
     <ErrorNotFound v-else-if="error.statusCode === 404" />
     <ErrorNotAllowed v-else-if="error.statusCode === 403" />
@@ -15,13 +15,14 @@
         happened or how you got here.
       </p>
       <v-btn
-        color="primary"
+        class="mt-8"
+        color="info"
         to="/"
       >
         Take me home
       </v-btn>
     </v-container>
-  </v-sheet>
+  </div>
 </template>
 
 <script>

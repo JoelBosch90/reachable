@@ -6,7 +6,7 @@
     <p class="body-1">
       Unfortunately, you're not allowed to visit the link you tried to visit.
     </p>
-    <h2 class="display-1 mb-4 mt-12">
+    <h2 class="display-1 mb-4 mt-8">
       Why am I not allowed to visit this link?
     </h2>
     <p class="body-1">
@@ -24,5 +24,12 @@
         allowed to see this page.
       </li>
     </ul>
+    <v-btn
+      class="mt-8"
+      color="info"
+      to="/"
+    >
+      Take me home
+    </v-btn>
   </v-container>
 </template>

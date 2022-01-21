@@ -3,6 +3,7 @@
     <v-app-bar
       app
       fixed
+      dark
     >
       <v-app-bar-title>
         Reachable
@@ -39,6 +40,7 @@
 
     <v-navigation-drawer
       v-model="showDrawer"
+      class="background"
       fixed
       temporary
       right
