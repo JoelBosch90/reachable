@@ -22,7 +22,7 @@ export default {
           label: 'Email address',
           rules: [
             value => !!value || 'Please supply an email address to which we' +
-                                ' can send this form\'s responses.',
+                                ' can send the responses.',
             // Use a simple regex to check for the presence of an @-symbol and
             // a dot in the domain name.
             value => /.+@.+\..+/.test(value) || 'Please supply a valid email' +

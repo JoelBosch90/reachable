@@ -26,8 +26,8 @@ export default {
             label: 'Description',
             rules: [],
             hint: 'This description will be shown near your form. You can use' +
-                  ' this to explain the form\'s purpose or ask questions to' +
-                  ' your respondents.',
+                  ' this to explain the purpose of this form or to ask' +
+                  ' questions to your respondents.',
             required: false
           },
           {
@@ -35,7 +35,7 @@ export default {
             label: 'Email address',
             rules: [
               value => !!value || 'Please supply an email address to which we' +
-                                  ' can send this form\'s responses.',
+                                  ' can send the responses.',
               // Use a simple regex to check for the presence of an @-symbol and
               // a dot in the domain name.
               value => /.+@.+\..+/.test(value) || 'Please supply a valid email' +

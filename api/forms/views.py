@@ -3,6 +3,7 @@ import json
 import os
 import datetime
 import re
+from html import escape
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, Http404
@@ -33,8 +34,6 @@ class FormListView(generics.CreateAPIView):
         Make sure that a form name is unique.
         """
 
-        print(f"Find unique name for: {name}")
-
         # We may have to try getting a unique name multiple times.
         while True:
 
@@ -63,8 +62,6 @@ class FormListView(generics.CreateAPIView):
             # Otherwise, we need to add a number.
             else:
                 name += '(1)'
-
-            print(f"New name: {name}")
 
     def post(self, request):
         """
@@ -107,7 +104,7 @@ class FormListView(generics.CreateAPIView):
         inputSerializer = InputSerializer(data={
             'name': "message",
             'label': "Message",
-            'hint': "Add a message to send to the form's owner.",
+            'hint': "Add a message to send to the owner of this form.",
             'required': True,
             'type': 'textarea',
             'form': form.pk
@@ -145,7 +142,7 @@ class FormResponseView(generics.CreateAPIView):
     # Everyone can respond to forms.
     permission_classes = [permissions.AllowAny]
 
-    def post(self, request, format=None):
+    def post(self, request):
         """
         Respond to a form.
         """
@@ -180,7 +177,7 @@ class FormConfirmationView(generics.RetrieveAPIView):
     # form's owner's email address.
     permission_classes = [permissions.AllowAny]
 
-    def get(self, request, key, format=None):
+    def get(self, request, key):
         """
         Try to confirm the form, then link to the associated form link's share
         page.
@@ -244,7 +241,7 @@ class FormDisableView(generics.RetrieveAPIView):
     # form's owner's email address.
     permission_classes = [permissions.AllowAny]
 
-    def get(self, request, key, format=None):
+    def get(self, request, key):
         """
         Disable the form, then redirect to a disabled form.
         """
@@ -337,7 +334,7 @@ class FormLinkView(generics.RetrieveAPIView):
     # Everyone can view form links.
     permission_classes = [permissions.AllowAny]
 
-    def get(self, request, key, format=None):
+    def get(self, request, key):
         """
         Get the details from a form link.
         """
@@ -347,16 +344,18 @@ class FormLinkView(generics.RetrieveAPIView):
 
         # Check if the link has expired.
         if formLink.hasExpired():
-            return HttpResponseRedirect(redirect_to=f"{os.getenv('CLIENT_URL')}/error/expired")
+            return HttpResponseRedirect(redirect_to=
+                f"{os.getenv('CLIENT_URL')}/error/expired")
 
-        # Construct the response object.
+        # Construct the response object. Make sure we escape all user generated
+        # strings.
         result = {
 
             # Add the form's name.
-            'name': formLink.form.name,
+            'name': escape(formLink.form.name),
 
             # Add the form's description.
-            'description': formLink.form.description,
+            'description': escape(formLink.form.description),
 
             # Pass on if the form's been disabled.
             'disabled': formLink.form.disabled,
@@ -366,11 +365,11 @@ class FormLinkView(generics.RetrieveAPIView):
 
             # We need to know all inputs.
             'inputs': [{
-                'name': input.name,
-                'label': input.label,
-                'hint': input.hint,
+                'name': escape(input.name),
+                'label': escape(input.label),
+                'hint': escape(input.hint),
                 'required': input.required,
-                'type': input.type,
+                'type': escape(input.type),
             } for input in formLink.form.inputs.all()]
         }
 

@@ -1,5 +1,6 @@
 # Import dependencies.
 import os
+from html import escape
 from django.core.mail import send_mail
 from forms.serializers import (
     FormConfirmationLinkSerializer, FormDisableLinkSerializer
@@ -45,6 +46,9 @@ class FormConfirmationMail:
         # Save the serializer to get the disabled link.
         disableURL = disableLinkSerializer.save().url()
 
+        # Make sure we escape the form's name.
+        escapedName = escape(link.form.name)
+
         # Create a template for a transactional email.
         template = TransactionalTemplate()
 
@@ -81,7 +85,7 @@ class FormConfirmationMail:
         send_mail(
 
             # Construct a confirmation message.
-            subject=f"Express delivery of your new '{link.form.name}' form.",
+            subject=f"Express delivery of your new '{escapedName}' form.",
 
             # Add the text version.
             message=text,
@@ -122,13 +126,16 @@ class FormResponseMail:
         # Save the serializer to get the disabled link.
         disableURL = disableLinkSerializer.save().url()
 
-        # Get the label with each response.
+        # Make sure we escape the form's name.
+        escapedName = escape(link.form.name)
+
+        # Get the label with each response. Make sure we escape these messages.
         labeled = [(link.form.inputs.filter(name=name).first().label, response)
                    for name, response in responses.items()]
 
         # Create the content message for the HTML email.
-        message = "<br/><br/>".join(f"<i>{label}</i><br/>{text}"
-            for label, text in labeled)
+        escapedMessage = "<br/><br/>".join(f"<i>{escape(label)}</i>" \
+                         f"<br/>{escape(text)}" for label, text in labeled)
 
         # Create a template for a transactional email.
         template = TransactionalTemplate()
@@ -136,11 +143,11 @@ class FormResponseMail:
         # Load all content into the template.
         template.replaceAll({
             'preheader': "You just received a new response for your" \
-                         f" '{link.form.name}' form!",
+                         f" '{escapedName}' form!",
             'title_text': "Hey there, form builder!",
             'title_link': os.getenv('CLIENT_URL'),
             'content': "You just received a new response for your" \
-                       f" '{link.form.name}' form:<br/><br/>{message}",
+                       f" '{escapedName}' form:<br/><br/>{escapedMessage}",
             'button_text': "TRY CUSTOM FORM",
             'button_link': f"{os.getenv('CLIENT_URL')}form/custom",
             'disable_link': disableURL,
@@ -149,10 +156,10 @@ class FormResponseMail:
 
         # Add an introduction to the message.
         text = "Hey there, form builder!\n\nYou just received a new" \
-               f" response for your '{link.form.name}' form:\n\n"
+               f" response for your '{escapedName}' form:\n\n"
 
         # Now list out the name and submission text for every input.
-        text += "\n\n".join(f"{label}\n{text}"
+        text += "\n\n".join(f"{escape(label)}\n{escape(text)}"
             for label, text in labeled)
 
         # Add a closing greeting to the mail.
@@ -167,7 +174,7 @@ class FormResponseMail:
         send_mail(
 
             # Add a subject.
-            subject=f"New response for the '{link.form.name}' form.",
+            subject=f"New response for the '{escapedName}' form.",
 
             # Add our message.
             message=text,
