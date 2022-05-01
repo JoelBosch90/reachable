@@ -13,6 +13,9 @@ WORKDIR /api
 # Copy the application files to the directory.
 COPY --chown=worker:worker . .
 
+# Make sure that we are allowed to run the executable.
+RUN chmod +x ./entrypoint.sh
+
 # We want to make sure that we don't run the install commands as a root user.
 USER worker
 
