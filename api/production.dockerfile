@@ -7,14 +7,14 @@ RUN useradd --shell /bin/bash --create-home worker
 # Create the working directory and give ownership to the worker.
 RUN mkdir -p /client && chown -R worker:worker /client
 
-# We want to make sure that we don't run the install commands as a root user.
-USER worker
-
 # Use the new working directory.
 WORKDIR /api
 
 # Copy the application files to the directory.
 COPY --chown=worker:worker . .
+
+# We want to make sure that we don't run the install commands as a root user.
+USER worker
 
 # Update PIP.
 RUN python -m pip install --upgrade pip
