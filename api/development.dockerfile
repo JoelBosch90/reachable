@@ -29,4 +29,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 3000
 
 # Start the API server.
-CMD ["./entrypoint.sh"]
+CMD ["sh", "./entrypoint.sh"]
