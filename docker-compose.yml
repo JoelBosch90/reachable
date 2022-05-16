@@ -31,6 +31,9 @@ services:
     # We can use the latest version of Nginx.
     image: nginx:1.21.0
 
+    # We always want to restart when things go wrong.
+    restart: always
+
     # We want to expose at port 8004.
     ports:
       - 8004:80
